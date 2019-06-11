@@ -1,14 +1,27 @@
+# Usage
+
+- DO NOT run install command in this repository, run it first in original ns-allinone-2.35 package, the program will remove all changes to the file
+
+- make under the ns-2.35 folder, there should be no error
+
+- run dtrr.tcl under ns2-script folder via: ns dtrr.tcl
+
+- There should be output of source IP address in hex
+
+---
+
 1. Introduction
-----------------
+
+---
 
 Ns-allinone is a package which contains required components and some of
 optional components used in running ns. The package contains an
 "install" script to automatically configure, compile and install these
 components. If you haven't installed ns before and want to quickly try
 ns out, ns-allinone may be easier than getting all the pieces by hand.
- 
+
 Currently the package contains:
-  
+
 - Tcl       Tcl release 8.5.8    (required component)
 - Tk        Tk release 8.5.8     (required component)
 - Otcl      otcl release 1.14    (required component)
@@ -21,7 +34,7 @@ Currently the package contains:
 - SGB       Stanford GraphBase
             package               (optional component)
 - CWEB      CWeb version 1.0 (?)  (optional component)
-- ZLib      zlib version 1.2.3    (optional component) 
+- ZLib      zlib version 1.2.3    (optional component)
 
 2. FEATURES IN ns-allinone-2.35
 -------------------------------
