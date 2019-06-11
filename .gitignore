@@ -2,5 +2,4 @@
 *.o
 
 # vscode file
-ns-2.35/.vscode/
-ns-2.35/ns.code-workspace
+.vscode/
