@@ -1,12 +1,14 @@
 # Usage
 
-- DO NOT run install command in this repository, run it first in original ns-allinone-2.35 package, the program will remove all changes to the file
+- keep a backup of ns-allinone-2.35/ns-2.35/Makefile, run install command in root folder according to [tutorial](https://www.youtube.com/watch?v=FXm8i1K-6jI)
 
-- make under the ns-2.35 folder, there should be no error
+- paste the Makefile back to ns-allinone-2.35/ns-2.35/
 
-- run dtrr.tcl under ns2-script folder via: ns dtrr.tcl
+- change the folder path in Makefile to your own path
 
-- There should be output of source IP address in hex
+- run make in ns-2.35 folder, then run ns scripts in ns2-scripts
+
+- There should be corresponding output
 
 ---
 
