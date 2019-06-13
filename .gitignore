@@ -3,3 +3,7 @@
 
 # vscode file
 .vscode/
+
+# nam and tr file
+**/*.nam
+**/*.tr
