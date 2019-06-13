@@ -7,6 +7,14 @@
 
 #include "dtrr-queue.h"
 
+struct flow {
+  float weight;
+};
+
+static const int DEFAULT_FLOW_NUM = 2;
+
+flow flows[DEFAULT_FLOW_NUM] = {{0.1}, {0.2}};
+
 static class DtRrQueueClass : public TclClass {
 public:
         DtRrQueueClass() : TclClass("Queue/DTRR") {}
@@ -21,7 +29,9 @@ void DtRrQueue::enque(Packet* p)
   hdr_ip* iph = hdr_ip::access(p);
 
   // test print out
-  fprintf(stderr, "Source IP address: %x\n", iph->saddr());
+  fprintf(stderr, "Flow ID: %x\n", iph->fid_);
+  fprintf(stderr, "Flow weight: %f\n", flows[iph->fid_ - 1].weight);
+
 
   // if IPv6 priority = 15 enqueue to queue1
   if (iph->prio_ == 15) {
