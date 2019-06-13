@@ -20,6 +20,8 @@ void DtRrQueue::enque(Packet* p)
 {
   hdr_ip* iph = hdr_ip::access(p);
   
+  fprintf(stderr, "Source IP address: %x\n", iph->saddr());
+
   // if IPv6 priority = 15 enqueue to queue1
   if (iph->prio_ == 15) {
     q1_->enque(p);
