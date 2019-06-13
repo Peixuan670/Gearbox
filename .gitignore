@@ -2,4 +2,4 @@
 *.o
 
 # vscode file
-ns-2.35/.vscode/
+.vscode/

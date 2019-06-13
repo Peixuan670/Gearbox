@@ -1,14 +1,29 @@
+# Usage
+
+- keep a backup of ns-allinone-2.35/ns-2.35/Makefile, run install command in root folder according to [tutorial](https://www.youtube.com/watch?v=FXm8i1K-6jI)
+
+- paste the Makefile back to ns-allinone-2.35/ns-2.35/
+
+- change the folder path in Makefile to your own path
+
+- run make in ns-2.35 folder, then run ns scripts in ns2-scripts
+
+- There should be corresponding output
+
+---
+
 1. Introduction
-----------------
+
+---
 
 Ns-allinone is a package which contains required components and some of
 optional components used in running ns. The package contains an
 "install" script to automatically configure, compile and install these
 components. If you haven't installed ns before and want to quickly try
 ns out, ns-allinone may be easier than getting all the pieces by hand.
- 
+
 Currently the package contains:
-  
+
 - Tcl       Tcl release 8.5.8    (required component)
 - Tk        Tk release 8.5.8     (required component)
 - Otcl      otcl release 1.14    (required component)
@@ -21,7 +36,7 @@ Currently the package contains:
 - SGB       Stanford GraphBase
             package               (optional component)
 - CWEB      CWeb version 1.0 (?)  (optional component)
-- ZLib      zlib version 1.2.3    (optional component) 
+- ZLib      zlib version 1.2.3    (optional component)
 
 2. FEATURES IN ns-allinone-2.35
 -------------------------------

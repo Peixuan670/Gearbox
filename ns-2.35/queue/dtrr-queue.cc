@@ -3,7 +3,7 @@
 // File:      dtrr-queue.cc
 // Written:   07/19/99 (for ns-2.1b4a)
 // Modifed:   10/14/01 (for ns-2.1b8a)
-// 
+//
 
 #include "dtrr-queue.h"
 
@@ -19,7 +19,8 @@ public:
 void DtRrQueue::enque(Packet* p)
 {
   hdr_ip* iph = hdr_ip::access(p);
-  
+
+  // test print out
   fprintf(stderr, "Source IP address: %x\n", iph->saddr());
 
   // if IPv6 priority = 15 enqueue to queue1
@@ -43,7 +44,7 @@ void DtRrQueue::enque(Packet* p)
 Packet* DtRrQueue::deque()
 {
   Packet *p;
-  
+
   if (deq_turn_ == 1) {
     p =  q1_->deque();
     if (p == 0) {
@@ -64,6 +65,6 @@ Packet* DtRrQueue::deque()
       deq_turn_ = 1;
     }
   }
-  
+
   return (p);
 }

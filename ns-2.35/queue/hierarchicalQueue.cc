@@ -8,11 +8,12 @@ public:
         TclObject* create(int, const char*const*) {
 	         return (new hierarchicalQueue);
 	}
-} class_hierarchical_queue
+} class_hierarchical_queue;
 
 void hierarchicalQueue::enque(Packet* p)
 {
   hdr_ip* iph = hdr_ip::access(p);
+
   
   // if IPv6 priority = 15 enqueue to queue1
   if (iph->prio_ == 15) {
