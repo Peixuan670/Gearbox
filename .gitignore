@@ -7,3 +7,8 @@
 # nam and tr file
 **/*.nam
 **/*.tr
+
+# excutable files
+ns-2.35/ns
+ns-2.35/nse
+ns-2.35/nstk
