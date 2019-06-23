@@ -8,11 +8,12 @@
 #include <string.h>
 #include "queue.h"
 #include "address.h"
+#include "Flow.h"
 
 
 class DtRrQueue : public Queue {
  public:
-         DtRrQueue() { 
+         DtRrQueue() {
 		q1_ = new PacketQueue;
 		q2_ = new PacketQueue;
 		pq_ = q1_;
