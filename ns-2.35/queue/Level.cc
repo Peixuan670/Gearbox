@@ -7,20 +7,22 @@
 Level::Level(): volume(10), currentIndex(0) {
 }
 
-void Level::push(Packet packet, int index) {
-    packet.setInsertFifo(index);
-    packet.setFifoPosition(static_cast<int>(fifos[index].size()));
-    fifos[index].push_back(packet);
+void Level::enque(Packet* packet, int index) {
+    // packet.setInsertFifo(index);
+    // packet.setFifoPosition(static_cast<int>(fifos[index].size()));
+    // hdr_ip* iph = hdr_ip::access(packet);
+
+    fifos[index]->enque(packet);
 }
 
-Packet Level::pull() {
+Packet* Level::deque() {
+    Packet *packet;
+
     if (isCurrentFifoEmpty()) {
-        Packet tmp(-1, -1, -1, -1, -1, -1);
-        return tmp;
+        return 0;
     }
-    Packet tmp = fifos[currentIndex].front();
-    fifos[currentIndex].pop_front();
-    return tmp;
+    packet = fifos[currentIndex]->deque();
+    return packet;
 }
 
 int Level::getCurrentIndex() {
@@ -36,9 +38,9 @@ void Level::getAndIncrementIndex() {
 }
 
 bool Level::isCurrentFifoEmpty() {
-    return fifos[currentIndex].empty();
+    return fifos[currentIndex]->deque == 0;
 }
 
 int Level::getCurrentFifoSize() {
-    return static_cast<int>(fifos[currentIndex].size());
+    return fifos[currentIndex]->length();
 }
