@@ -222,6 +222,7 @@ OBJ_CC = \
 	tcp/ack-recons.o \
 	queue/dtrr-queue.o \
 	queue/try.o \
+	queue/flow.o \
 	queue/sfq.o queue/fq.o queue/drr.o queue/srr.o queue/cbq.o \
 	queue/jobs.o queue/marker.o queue/demarker.o \
 	link/hackloss.o queue/errmodel.o queue/fec.o\
