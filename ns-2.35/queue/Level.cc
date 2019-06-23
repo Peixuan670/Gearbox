@@ -38,7 +38,7 @@ void Level::getAndIncrementIndex() {
 }
 
 bool Level::isCurrentFifoEmpty() {
-    return fifos[currentIndex]->deque == 0;
+    return fifos[currentIndex]->length() == 0;
 }
 
 int Level::getCurrentFifoSize() {
