@@ -8,7 +8,7 @@
 #include <string.h>
 #include "queue.h"
 #include "address.h"
-
+#include "Flow.h"
 
 class TryQueue : public Queue {
  public:
