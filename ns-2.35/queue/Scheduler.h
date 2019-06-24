@@ -21,10 +21,10 @@ private:
 public:
     Scheduler();
     explicit Scheduler(int volume);
-    int push(Packet packet, int insertLevel);
-    Packet serveCycle();
+    int push(Packet* packet, int insertLevel);
     void setCurrentRound(int currentRound);
-    vector<Packet> serveUpperLevel(int &, int);
+    // Packet* serveCycle();
+    // vector<Packet> serveUpperLevel(int &, int);
 };
 
 

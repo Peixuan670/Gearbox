@@ -1,25 +1,25 @@
-#include <string.h>
+#include "Level.h"
+#include "Flow.h"
 #include <vector>
-#include "queue.h"
-#include "address.h"
 
 using namespace std;
 
 class hierarchicalQueue : public Queue {
- public:
-    hierarchicalQueue(int volumn = DEFAULT_VOLUME) { 
-		levels = vector<vector<PacketQueue>>(volumn, vector<PacketQueue>(10));
-        this->volumn = volumn;
-		currentRound = 0;
-	}
-
- protected:
-    void enque(Packet*);
-	Packet* deque();
-    vector<vector<PacketQueue>> levels;
-
-    int volumn;
-    int currentRound;
+private:
     static const int DEFAULT_VOLUME = 3;
-
+    int volume;                     // num of levels in scheduler
+    int currentRound;           // current Round
+    Level levels[3];
+    Level hundredLevel;
+    Level decadeLevel;
+    Flow flows[2];
+public:
+    hierarchicalQueue();
+    explicit hierarchicalQueue(int);
+    void enque(Packet*);
+    Packet* deque();
+    void setCurrentRound(int);
+    int cal_theory_departure_round(hdr_ip*);
+    // Packet* serveCycle();
+    // vector<Packet> serveUpperLevel(int &, int);
 };

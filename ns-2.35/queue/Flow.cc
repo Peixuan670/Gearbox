@@ -5,10 +5,10 @@
 #include "Flow.h"
 
 Flow::Flow(int id, float weight) {
-    lastDepartureRound = 0;
     this->flowId = id;
     this->weight = weight;
     this->insertLevel = 0;
+    this->lastDepartureRound = 0;
 }
 
 int Flow::getLastDepartureRound() const {
