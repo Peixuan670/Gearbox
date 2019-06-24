@@ -31,7 +31,7 @@ void hierarchicalQueue::enque(Packet* packet) {
     // TODO: get theory departure Round
     // You can get flowId from iph, then get
     // "lastDepartureRound" -- departure round of last packet of this flow
-    int departureRound = cal_theory_departure_round(iph);
+    int departureRound = cal_theory_departure_round(iph, currentRound);
     ///////////////////////////////////////////////////
 
     int insertLevel = cal_insert_level(departureRound, currentRound);
@@ -64,7 +64,7 @@ void hierarchicalQueue::enque(Packet* packet) {
 }
 
 // Peixuan: This can be replaced by any other algorithms
-int cal_theory_departure_round(hdr_ip* iph) {
+int cal_theory_departure_round(hdr_ip* iph, int currentRound) {
     //int		fid_;	/* flow id */
     //int		prio_;
     // parameters in iph
