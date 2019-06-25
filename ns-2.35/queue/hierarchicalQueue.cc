@@ -15,7 +15,8 @@ hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
 
 hierarchicalQueue::hierarchicalQueue(int volume) {
     this->volume = volume;
-    flows = {Flow(0, 0.1), Flow(1, 0.2), Flow(2, 0.3)};
+    flows.push_back(Flow(1, 0.2));
+    // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
 }
 
@@ -64,7 +65,7 @@ void hierarchicalQueue::enque(Packet* packet) {
 }
 
 // Peixuan: This can be replaced by any other algorithms
-int cal_theory_departure_round(hdr_ip* iph) {
+int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph) {
     //int		fid_;	/* flow id */
     //int		prio_;
     // parameters in iph
@@ -73,15 +74,15 @@ int cal_theory_departure_round(hdr_ip* iph) {
     // Peixuan 06242019
     // For simplicity, we assume flow id = the index of array 'flows'
     int curFlowID = iph->flowid();
-    float curWeight = this->flows[curFlowID]->getWeight();
-    int curLastDepartureRound = this->flows[curFlowID]->getLastDepartureRound();
-    int curStartRound = max(this->currentRound, curLastDepartureRound);
+    float curWeight = flows[curFlowID].getWeight();
+    int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
+    int curStartRound = max(currentRound, curLastDepartureRound);
     int curDeaprtureRound = (int)(curStartRound + 1/curWeight); // TODO: This line needs to take another thought
-    this->flows[curFlowID]->setLastDepartureRound(curDeaprtureRound);
+    flows[curFlowID].setLastDepartureRound(curDeaprtureRound);
     return curDeaprtureRound;    
 }
 
-int cal_insert_level(int departureRound, int currentRound) {
+int hierarchicalQueue::cal_insert_level(int departureRound, int currentRound) {
   return 0;
 }
 
