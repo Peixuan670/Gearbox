@@ -13,6 +13,12 @@ private:
     Level hundredLevel;
     Level decadeLevel;
     vector<Flow> flows;
+    //06262019 Peixuan
+    vector<Packet> pktCurRound;
+
+    // 06262019 Peixuan
+    vector<Packet> runRound();
+    vector<Packet> serveUpperLevel(int &, int);
 public:
     hierarchicalQueue();
     explicit hierarchicalQueue(int);
