@@ -97,6 +97,7 @@ Packet* hierarchicalQueue::deque() {
         //Packet* pkt = pktCurRound.
     } else {
         pktCurRound = this->runRound();
+        this->setCurrentRound(currentRound+1); // Update system virtual clock
         this->deque();
     }
     
