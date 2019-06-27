@@ -27,6 +27,7 @@ void hierarchicalQueue::setCurrentRound(int currentRound) {
 void hierarchicalQueue::enque(Packet* packet) {
 
     hdr_ip* iph = hdr_ip::access(packet);
+    int pkt_size = packet->hdrlen_ + packet->datalen();
 
     ///////////////////////////////////////////////////
     // TODO: get theory departure Round
@@ -66,7 +67,7 @@ void hierarchicalQueue::enque(Packet* packet) {
 }
 
 // Peixuan: This can be replaced by any other algorithms
-int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph) {
+int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     //int		fid_;	/* flow id */
     //int		prio_;
     // parameters in iph
@@ -78,7 +79,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph) {
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
     int curStartRound = max(currentRound, curLastDepartureRound);
-    int curDeaprtureRound = (int)(curStartRound + 1/curWeight); // TODO: This line needs to take another thought
+    int curDeaprtureRound = (int)(curStartRound + pkt_size/curWeight); // TODO: This line needs to take another thought
 
     // TODO: need packet length and bandwidh relation
     flows[curFlowID].setLastDepartureRound(curDeaprtureRound);

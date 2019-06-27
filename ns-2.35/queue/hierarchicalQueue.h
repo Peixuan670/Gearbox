@@ -25,7 +25,7 @@ public:
     void enque(Packet*);
     Packet* deque();
     void setCurrentRound(int);
-    int cal_theory_departure_round(hdr_ip*);
+    int cal_theory_departure_round(hdr_ip*, pkt_size);
     int cal_insert_level(int, int);
     // Packet* serveCycle();
     // vector<Packet> serveUpperLevel(int &, int);
