@@ -12,7 +12,13 @@ private:
     Level levels[3];
     Level hundredLevel;
     Level decadeLevel;
-    Flow flows[2];
+    vector<Flow> flows;
+    //06262019 Peixuan
+    vector<Packet> pktCurRound;
+
+    // 06262019 Peixuan
+    vector<Packet> runRound();
+    vector<Packet> serveUpperLevel(int &, int);
 public:
     hierarchicalQueue();
     explicit hierarchicalQueue(int);
@@ -20,6 +26,7 @@ public:
     Packet* deque();
     void setCurrentRound(int);
     int cal_theory_departure_round(hdr_ip*);
+    int cal_insert_level(int, int);
     // Packet* serveCycle();
     // vector<Packet> serveUpperLevel(int &, int);
 };
