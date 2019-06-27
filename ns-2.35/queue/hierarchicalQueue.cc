@@ -69,7 +69,7 @@ int cal_theory_departure_round(hdr_ip* iph) {
     //int		prio_;
     // parameters in iph
     // TODO
-    
+
     // Peixuan 06242019
     // For simplicity, we assume flow id = the index of array 'flows'
     int curFlowID = iph->flowid();
@@ -78,7 +78,7 @@ int cal_theory_departure_round(hdr_ip* iph) {
     int curStartRound = max(this->currentRound, curLastDepartureRound);
     int curDeaprtureRound = (int)(curStartRound + 1/curWeight); // TODO: This line needs to take another thought
     this->flows[curFlowID]->setLastDepartureRound(curDeaprtureRound);
-    return curDeaprtureRound;    
+    return curDeaprtureRound;
 }
 
 int cal_insert_level(int departureRound, int currentRound) {
