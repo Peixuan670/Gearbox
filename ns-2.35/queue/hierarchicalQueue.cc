@@ -35,32 +35,33 @@ void hierarchicalQueue::enque(Packet* packet) {
     int departureRound = cal_theory_departure_round(iph);
     ///////////////////////////////////////////////////
 
-    int insertLevel = cal_insert_level(departureRound, currentRound);
+    // 20190626 Yitao
+    /* With departureRound and currentRound, we can get the insertLevel, insertLevel is a parameter of flow and we can set and read this variable.
+    */
+
+    int flowId = iph->flowid;
+    int insertLevel = flows[flowId].getInsertLevel;
 
     departureRound = max(departureRound, currentRound);
     if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
         if (departureRound / 100 % 10 == 5) {
+            flows[flowId].setInsertLevel(1);
             hundredLevel.enque(packet, departureRound / 10 % 10);
-            // return 1;
         } else {
-            // packet.setInsertLevel(2);
+            flows[flowId].setInsertLevel(2);
             levels[2].enque(packet, departureRound / 100 % 10);
-            // return 2;
         }
     } else if (departureRound / 10 != currentRound / 10 || insertLevel == 1) {
         if (departureRound / 10 % 10 == 5) {
-            // packet.setInsertLevel(0);
+            flows[flowId].setInsertLevel(0);
             decadeLevel.enque(packet, departureRound  % 10);
-            // return 0;
         } else {
-            // packet.setInsertLevel(1);
+            flows[flowId].setInsertLevel(1);
             levels[1].enque(packet, departureRound / 10 % 10);
-            // return 1;
         }
     } else {
-        // packet.setInsertLevel(0);
+        flows[flowId].setInsertLevel(0);
         levels[0].enque(packet, departureRound % 10);
-        // return 0;
     }
 }
 
@@ -82,10 +83,6 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph) {
     // TODO: need packet length and bandwidh relation
     flows[curFlowID].setLastDepartureRound(curDeaprtureRound);
     return curDeaprtureRound;
-}
-
-int hierarchicalQueue::cal_insert_level(int departureRound, int currentRound) {
-  return 0;
 }
 
 //06262019 Peixuan deque function of Gearbox:

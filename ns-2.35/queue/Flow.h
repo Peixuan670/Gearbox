@@ -17,7 +17,6 @@ private:
     int lastDepartureRound;
     int insertLevel;
 public:
-    Flow();
     Flow(int id, float weight);
 
     float getWeight() const;
