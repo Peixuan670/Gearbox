@@ -18,14 +18,14 @@ private:
 
     // 06262019 Peixuan
     vector<Packet> runRound();
-    vector<Packet> serveUpperLevel(int &, int);
+    vector<Packet> serveUpperLevel(int);
 public:
     hierarchicalQueue();
     explicit hierarchicalQueue(int);
     void enque(Packet*);
     Packet* deque();
     void setCurrentRound(int);
-    int cal_theory_departure_round(hdr_ip*, pkt_size);
+    int cal_theory_departure_round(hdr_ip*, int);
     int cal_insert_level(int, int);
     // Packet* serveCycle();
     // vector<Packet> serveUpperLevel(int &, int);

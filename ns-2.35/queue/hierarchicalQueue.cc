@@ -33,15 +33,15 @@ void hierarchicalQueue::enque(Packet* packet) {
     // TODO: get theory departure Round
     // You can get flowId from iph, then get
     // "lastDepartureRound" -- departure round of last packet of this flow
-    int departureRound = cal_theory_departure_round(iph);
+    int departureRound = cal_theory_departure_round(iph, pkt_size);
     ///////////////////////////////////////////////////
 
     // 20190626 Yitao
     /* With departureRound and currentRound, we can get the insertLevel, insertLevel is a parameter of flow and we can set and read this variable.
     */
 
-    int flowId = iph->flowid;
-    int insertLevel = flows[flowId].getInsertLevel;
+    int flowId = iph->flowid();
+    int insertLevel = flows[flowId].getInsertLevel();
 
     departureRound = max(departureRound, currentRound);
     if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
@@ -94,6 +94,7 @@ Packet* hierarchicalQueue::deque() {
     if (pktCurRound.size()) {
         // Pop out the first packet in pktCurRound until it is empty
         //Packet* pkt = pktCurRound.
+
     } else {
         pktCurRound = this->runRound();
         this->setCurrentRound(currentRound+1); // Update system virtual clock
@@ -103,9 +104,9 @@ Packet* hierarchicalQueue::deque() {
 }
 
 // Peixuan: now we only call this function to get the departure packet in the next round
-vector<Packet> hierarchicalQueueClass::runRound() {
+vector<Packet> hierarchicalQueue::runRound() {
     vector<Packet> result;
-    vector<Packet> upperLevelPackets = hierarchicalQueueClass.serveUpperLevel(currentCycle, currentRound);
+    vector<Packet> upperLevelPackets = serveUpperLevelcurrentRound);
 
     // Peixuan
     /*for (int i = 0; i < upperLevelPackets.size(); i++) {
@@ -147,7 +148,7 @@ vector<Packet> hierarchicalQueueClass::runRound() {
 
 //Peixuan: This is also used to get the packet served in this round (VC unit)
 // We need to adjust the order of serving: level0 -> level1 -> level2
-vector<Packet> hierarchicalQueueClass::serveUpperLevel(int &currentCycle, int currentRound) {
+vector<Packet> hierarchicalQueue::serveUpperLevel(int currentRound) {
     vector<Packet> result;
 
     // ToDo: swap the order of serving levels
@@ -155,7 +156,7 @@ vector<Packet> hierarchicalQueueClass::serveUpperLevel(int &currentCycle, int cu
     if (currentRound / 100 % 10 == 5) {
         int size = static_cast<int>(ceil(hundredLevel.getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));
         for (int i = 0; i < size; i++) {
-            Packet tmp = hundredLevel.pull();
+            Packet tmp = hundredLevel.deque();
             if (tmp.getPacketOrder() == -1)
                 break;
             currentCycle++;
