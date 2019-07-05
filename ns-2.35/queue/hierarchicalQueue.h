@@ -14,11 +14,11 @@ private:
     Level decadeLevel;
     vector<Flow> flows;
     //06262019 Peixuan
-    vector<Packet> pktCurRound;
+    vector<Packet*> pktCurRound;
 
     // 06262019 Peixuan
-    vector<Packet> runRound();
-    vector<Packet> serveUpperLevel(int);
+    vector<Packet*> runRound();
+    vector<Packet*> serveUpperLevel(int);
 public:
     hierarchicalQueue();
     explicit hierarchicalQueue(int);
