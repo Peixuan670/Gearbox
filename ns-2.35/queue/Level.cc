@@ -27,10 +27,10 @@ void Level::enque(Packet* packet, int index) {
 Packet* Level::deque() {
     Packet *packet;
 
-    fprintf(stderr, "Dequeue from this level\n"); // Debug: Peixuan 07062019
+    // fprintf(stderr, "Dequeue from this level\n"); // Debug: Peixuan 07062019
 
     if (isCurrentFifoEmpty()) {
-        fprintf(stderr, "No packet in the current serving FIFO\n"); // Debug: Peixuan 07062019
+        // fprintf(stderr, "No packet in the current serving FIFO\n"); // Debug: Peixuan 07062019
         return 0;
     }
     packet = fifos[currentIndex]->deque();
@@ -50,12 +50,13 @@ void Level::getAndIncrementIndex() {
 }
 
 bool Level::isCurrentFifoEmpty() {
-    fprintf(stderr, "Checking if the FIFO is empty\n"); // Debug: Peixuan 07062019
-    fifos[currentIndex]->length() == 0;
-    fprintf(stderr, "Bug here solved\n"); // Debug: Peixuan 07062019
+    // fprintf(stderr, "Checking if the FIFO is empty\n"); // Debug: Peixuan 07062019
+    // fifos[currentIndex]->length() == 0;
+    // fprintf(stderr, "Bug here solved\n"); // Debug: Peixuan 07062019
     return fifos[currentIndex]->length() == 0;
 }
 
 int Level::getCurrentFifoSize() {
+    // fprintf(stderr, "get current fifo size\n"); // Debug: Yitao 07062019
     return fifos[currentIndex]->length();
 }
