@@ -6,14 +6,17 @@ static class hierarchicalQueueClass : public TclClass {
 public:
         hierarchicalQueueClass() : TclClass("Queue/HRCC") {}
         TclObject* create(int, const char*const*) {
-	         return (new hierarchicalQueue);
+            fprintf(stderr, "Created new TCL HCS instance\n"); // Debug: Peixuan 07062019
+	        return (new hierarchicalQueue);
 	}
 } class_hierarchical_queue;
 
 hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
+    fprintf(stderr, "Created new HCS instance\n"); // Debug: Peixuan 07062019
 }
 
 hierarchicalQueue::hierarchicalQueue(int volume) {
+    fprintf(stderr, "Created new HCS instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
     flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
@@ -21,10 +24,13 @@ hierarchicalQueue::hierarchicalQueue(int volume) {
 }
 
 void hierarchicalQueue::setCurrentRound(int currentRound) {
+    fprintf(stderr, "Set Current Round: %d\n", currentRound); // Debug: Peixuan 07062019
     this->currentRound = currentRound;
 }
 
 void hierarchicalQueue::enque(Packet* packet) {
+
+    fprintf(stderr, "Start Enqueue\n"); // Debug: Peixuan 07062019
 
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
@@ -64,6 +70,8 @@ void hierarchicalQueue::enque(Packet* packet) {
         flows[flowId].setInsertLevel(0);
         levels[0].enque(packet, departureRound % 10);
     }
+
+    fprintf(stderr, "Finish Enqueue\n"); // Debug: Peixuan 07062019
 }
 
 // Peixuan: This can be replaced by any other algorithms
@@ -75,6 +83,9 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
     // Peixuan 06242019
     // For simplicity, we assume flow id = the index of array 'flows'
+
+    fprintf(stderr, "Calculate Departure Round\n"); // Debug: Peixuan 07062019
+
     int curFlowID = iph->flowid();
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
@@ -91,6 +102,9 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 //06262019 Static getting all the departure packet in this virtual clock unit (JUST FOR SIMULATION PURPUSE!)
 
 Packet* hierarchicalQueue::deque() {
+
+    fprintf(stderr, "Start Dequeue\n"); // Debug: Peixuan 07062019
+
     if (pktCurRound.size()) {
         // Pop out the first packet in pktCurRound until it is empty
         //Packet* pkt = pktCurRound.
@@ -98,18 +112,35 @@ Packet* hierarchicalQueue::deque() {
         pktCurRound.erase(pktCurRound.begin());
         return p;
     } else {
+        fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019
         pktCurRound = this->runRound();
         this->setCurrentRound(currentRound + 1); // Update system virtual clock
         this->deque();
     }
 
+    fprintf(stderr, "Finish Dequeue\n"); // Debug: Peixuan 07062019
+
 }
 
 // Peixuan: now we only call this function to get the departure packet in the next round
 vector<Packet*> hierarchicalQueue::runRound() {
+
+    fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
+
     vector<Packet*> result;
 
+    // Debug: Peixuan 07062019: Bug Founded: What if the queue is empty at the moment? Check Size!
+    
+    fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
+
     Packet* p = levels[0].deque();
+
+    fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
+
+    if (!p) {
+        fprintf(stderr, "No packet\n"); // Debug: Peixuan 07062019
+    }
+
     while (p) {
         result.push_back(p);
         p = levels[0].deque();
@@ -169,6 +200,9 @@ vector<Packet*> hierarchicalQueue::runRound() {
 //Peixuan: This is also used to get the packet served in this round (VC unit)
 // We need to adjust the order of serving: level0 -> level1 -> level2
 vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
+
+    fprintf(stderr, "Serving Upper Level\n"); // Debug: Peixuan 07062019
+
     vector<Packet*> result;
 
     // ToDo: swap the order of serving levels
