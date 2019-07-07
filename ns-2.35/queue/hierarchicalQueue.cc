@@ -18,11 +18,11 @@ hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
 hierarchicalQueue::hierarchicalQueue(int volume) {
     fprintf(stderr, "Created new HCS instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
-    /*flows.push_back(Flow(0, 0.2));
-    flows.push_back(Flow(1, 0.2));
-    flows.push_back(Flow(2, 0.2));
-    flows.push_back(Flow(3, 0.2));*/
-    flows.push_back(Flow(1, 0.2));
+    flows.push_back(Flow(0, 2));
+    flows.push_back(Flow(1, 2));
+    flows.push_back(Flow(2, 2));
+    flows.push_back(Flow(3, 2));
+    //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
     pktCount = 0; // 07072019 Peixuan
@@ -41,7 +41,7 @@ void hierarchicalQueue::setPktCount(int pktCount) {
 
 void hierarchicalQueue::enque(Packet* packet) {
 
-    fprintf(stderr, "%%%%%%%Start Enqueue\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "AAAAA Start Enqueue\n"); // Debug: Peixuan 07062019
 
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
@@ -61,7 +61,14 @@ void hierarchicalQueue::enque(Packet* packet) {
     int insertLevel = flows[flowId].getInsertLevel();
 
     departureRound = max(departureRound, currentRound);
+
+    if ((departureRound / 100 - currentRound / 100) >= 10) {
+        fprintf(stderr, "?????Exceeds maximum round\n"); // Debug: Peixuan 07072019
+        return;   // 07072019 Peixuan: exceeds the maximum round
+    }
+
     if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
+        fprintf(stderr, "Enqueue Level 2\n"); // Debug: Peixuan 07072019
         if (departureRound / 100 % 10 == 5) {
             flows[flowId].setInsertLevel(1);
             hundredLevel.enque(packet, departureRound / 10 % 10);
@@ -70,6 +77,7 @@ void hierarchicalQueue::enque(Packet* packet) {
             levels[2].enque(packet, departureRound / 100 % 10);
         }
     } else if (departureRound / 10 != currentRound / 10 || insertLevel == 1) {
+        fprintf(stderr, "Enqueue Level 1\n"); // Debug: Peixuan 07072019
         if (departureRound / 10 % 10 == 5) {
             flows[flowId].setInsertLevel(0);
             decadeLevel.enque(packet, departureRound  % 10);
@@ -78,6 +86,7 @@ void hierarchicalQueue::enque(Packet* packet) {
             levels[1].enque(packet, departureRound / 10 % 10);
         }
     } else {
+        fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
         flows[flowId].setInsertLevel(0);
         levels[0].enque(packet, departureRound % 10);
     }
@@ -103,7 +112,9 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
     int curStartRound = max(currentRound, curLastDepartureRound);
-    int curDeaprtureRound = (int)(curStartRound + pkt_size/curWeight); // TODO: This line needs to take another thought
+    //int curDeaprtureRound = (int)(curStartRound + pkt_size/curWeight); // TODO: This line needs to take another thought
+
+    int curDeaprtureRound = (int)(curStartRound + curWeight); // 07072019 Peixuan: basic test
 
     fprintf(stderr, "$$$$$Calculated Departure Round = %d\n", curDeaprtureRound); // Debug: Peixuan 07062019
     // TODO: need packet length and bandwidh relation
@@ -130,7 +141,7 @@ Packet* hierarchicalQueue::deque() {
         fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019
         pktCurRound = this->runRound();
         this->setCurrentRound(currentRound + 1); // Update system virtual clock
-        this->deque();
+        //this->deque();
     }
 
     Packet *p = pktCurRound.front();
