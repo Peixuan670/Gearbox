@@ -9,6 +9,7 @@ private:
     static const int DEFAULT_VOLUME = 3;
     int volume;                     // num of levels in scheduler
     int currentRound;           // current Round
+    int pktCount;           // packet count
     Level levels[3];
     Level hundredLevel;
     Level decadeLevel;
@@ -19,6 +20,7 @@ private:
     // 06262019 Peixuan
     vector<Packet*> runRound();
     vector<Packet*> serveUpperLevel(int);
+    void setPktCount(int);
 public:
     hierarchicalQueue();
     explicit hierarchicalQueue(int);

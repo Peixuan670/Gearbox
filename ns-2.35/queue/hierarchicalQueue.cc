@@ -21,16 +21,23 @@ hierarchicalQueue::hierarchicalQueue(int volume) {
     flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
+    pktCount = 0; // 07072019 Peixuan
+    //pktCurRound = new vector<Packet*>;
 }
 
 void hierarchicalQueue::setCurrentRound(int currentRound) {
-    // printf("Set Current Round: %d\n", currentRound); // Debug: Peixuan 07062019
+    fprintf(stderr, "Set Current Round: %d\n", currentRound); // Debug: Peixuan 07062019
     this->currentRound = currentRound;
+}
+
+void hierarchicalQueue::setPktCount(int pktCount) {
+    fprintf(stderr, "Set Packet Count: %d\n", pktCount); // Debug: Peixuan 07072019
+    this->pktCount = pktCount;
 }
 
 void hierarchicalQueue::enque(Packet* packet) {
 
-    // fprintf(stderr, "Start Enqueue\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Start Enqueue\n"); // Debug: Peixuan 07062019
 
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
@@ -71,7 +78,9 @@ void hierarchicalQueue::enque(Packet* packet) {
         levels[0].enque(packet, departureRound % 10);
     }
 
-    // fprintf(stderr, "Finish Enqueue\n"); // Debug: Peixuan 07062019
+    setPktCount(pktCount + 1);
+
+    fprintf(stderr, "Finish Enqueue\n"); // Debug: Peixuan 07062019
 }
 
 // Peixuan: This can be replaced by any other algorithms
@@ -84,7 +93,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     // Peixuan 06242019
     // For simplicity, we assume flow id = the index of array 'flows'
 
-    // fprintf(stderr, "Calculate Departure Round\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Calculate Departure Round\n"); // Debug: Peixuan 07062019
 
     int curFlowID = iph->flowid();
     float curWeight = flows[curFlowID].getWeight();
@@ -103,43 +112,69 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
 Packet* hierarchicalQueue::deque() {
 
-    // fprintf(stderr, "Start Dequeue\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Start Dequeue\n"); // Debug: Peixuan 07062019
 
-    if (pktCurRound.size()) {
-        // Pop out the first packet in pktCurRound until it is empty
-        //Packet* pkt = pktCurRound.
-        Packet *p = pktCurRound.front();
-        pktCurRound.erase(pktCurRound.begin());
-        return p;
-    } else {
-        // fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019
-        pktCurRound = this->runRound(pktCurRound);
+    //fprintf(stderr, "Queue size: %d\n",pktCurRound.size()); // Debug: Peixuan 07062019
+
+    if (pktCount == 0) {
+        fprintf(stderr, "Scheduler Empty\n"); // Debug: Peixuan 07062019
+        return 0;
+    }
+
+    while (!pktCurRound.size()) {
+        fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019
+        pktCurRound = this->runRound();
         this->setCurrentRound(currentRound + 1); // Update system virtual clock
         this->deque();
     }
 
-    // fprintf(stderr, "Finish Dequeue\n"); // Debug: Peixuan 07062019
+    Packet *p = pktCurRound.front();
+    pktCurRound.erase(pktCurRound.begin());
+
+    setPktCount(pktCount - 1);
+
+    hdr_ip* iph = hdr_ip::access(p);
+    fprintf(stderr, "Dequeue Packet p with soure IP: %x\n", iph->saddr()); // Debug: Peixuan 07062019
+    return p;
+
+
+
+    /*if (pktCurRound.size()) {
+        // Pop out the first packet in pktCurRound until it is empty
+        //Packet* pkt = pktCurRound.
+        Packet *p = pktCurRound.front();
+        pktCurRound.erase(pktCurRound.begin());
+
+        hdr_ip* iph = hdr_ip::access(p);
+        fprintf(stderr, "Dequeue Packet p with soure IP: %x\n", iph->saddr()); // Debug: Peixuan 07062019
+        return p;
+    } else {
+        fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019
+        pktCurRound = this->runRound();
+        this->setCurrentRound(currentRound + 1); // Update system virtual clock
+        this->deque();
+    }*/
 
 }
 
 // Peixuan: now we only call this function to get the departure packet in the next round
 vector<Packet*> hierarchicalQueue::runRound() {
 
-    // fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
 
     vector<Packet*> result;
 
     // Debug: Peixuan 07062019: Bug Founded: What if the queue is empty at the moment? Check Size!
     
-    // fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
 
     Packet* p = levels[0].deque();
 
-    // fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
 
-    // if (!p) {
-    //     fprintf(stderr, "No packet\n"); // Debug: Peixuan 07062019
-    // }
+    if (!p) {
+        fprintf(stderr, "No packet\n"); // Debug: Peixuan 07062019
+    }
 
     while (p) {
         result.push_back(p);
@@ -165,8 +200,7 @@ vector<Packet*> hierarchicalQueue::runRound() {
         packetNum--;
     }*/
 
-    if (upperLevelPackets.size()) 
-        result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());
+    result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());
 
     //Packet p = runCycle(); Peixuan
     // backup cycle for the idling situation
@@ -202,7 +236,7 @@ vector<Packet*> hierarchicalQueue::runRound() {
 // We need to adjust the order of serving: level0 -> level1 -> level2
 vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
 
-    // fprintf(stderr, "Serving Upper Level\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Serving Upper Level\n"); // Debug: Peixuan 07062019
 
     vector<Packet*> result;
 
@@ -250,7 +284,6 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             result.push_back(p);
         }
     }
-    //fprintf(stderr, "Upper Level served success with %d packets\n", result.size()); // Debug: Yitao 07062019
 
     return result;
 }
