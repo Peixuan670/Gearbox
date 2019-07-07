@@ -18,6 +18,10 @@ hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
 hierarchicalQueue::hierarchicalQueue(int volume) {
     fprintf(stderr, "Created new HCS instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
+    /*flows.push_back(Flow(0, 0.2));
+    flows.push_back(Flow(1, 0.2));
+    flows.push_back(Flow(2, 0.2));
+    flows.push_back(Flow(3, 0.2));*/
     flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -37,7 +41,7 @@ void hierarchicalQueue::setPktCount(int pktCount) {
 
 void hierarchicalQueue::enque(Packet* packet) {
 
-    fprintf(stderr, "Start Enqueue\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "%%%%%%%Start Enqueue\n"); // Debug: Peixuan 07062019
 
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
@@ -93,7 +97,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     // Peixuan 06242019
     // For simplicity, we assume flow id = the index of array 'flows'
 
-    fprintf(stderr, "Calculate Departure Round\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "+++++Calculate Departure Round\n"); // Debug: Peixuan 07062019
 
     int curFlowID = iph->flowid();
     float curWeight = flows[curFlowID].getWeight();
@@ -101,6 +105,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     int curStartRound = max(currentRound, curLastDepartureRound);
     int curDeaprtureRound = (int)(curStartRound + pkt_size/curWeight); // TODO: This line needs to take another thought
 
+    fprintf(stderr, "$$$$$Calculated Departure Round = %d\n", curDeaprtureRound); // Debug: Peixuan 07062019
     // TODO: need packet length and bandwidh relation
     flows[curFlowID].setLastDepartureRound(curDeaprtureRound);
     return curDeaprtureRound;
@@ -134,7 +139,7 @@ Packet* hierarchicalQueue::deque() {
     setPktCount(pktCount - 1);
 
     hdr_ip* iph = hdr_ip::access(p);
-    fprintf(stderr, "Dequeue Packet p with soure IP: %x\n", iph->saddr()); // Debug: Peixuan 07062019
+    fprintf(stderr, "*****Dequeue Packet p with soure IP: %x\n", iph->saddr()); // Debug: Peixuan 07062019
     return p;
 
 
