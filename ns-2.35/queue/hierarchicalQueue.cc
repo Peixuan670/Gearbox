@@ -18,11 +18,13 @@ hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
 hierarchicalQueue::hierarchicalQueue(int volume) {
     fprintf(stderr, "Created new HCS instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
-    flows.push_back(Flow(0, 2));
-    flows.push_back(Flow(1, 2));
-    flows.push_back(Flow(2, 2));
-    flows.push_back(Flow(3, 2));
-    //flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(0, 20));
+    flows.push_back(Flow(1, 20));
+    flows.push_back(Flow(2, 20));
+    flows.push_back(Flow(3, 20));
+    flows.push_back(Flow(4, 20));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(5, 20));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(6, 20));        //07062019: Peixuan adding more flows for strange flow 3 problem
     //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -64,7 +66,8 @@ void hierarchicalQueue::enque(Packet* packet) {
     departureRound = max(departureRound, currentRound);
 
     if ((departureRound / 100 - currentRound / 100) >= 10) {
-        fprintf(stderr, "?????Exceeds maximum round\n"); // Debug: Peixuan 07072019
+        fprintf(stderr, "?????Exceeds maximum round, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
+        drop(packet);
         return;   // 07072019 Peixuan: exceeds the maximum round
     }
 
