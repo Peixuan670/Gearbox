@@ -22,6 +22,7 @@ hierarchicalQueue::hierarchicalQueue(int volume) {
     flows.push_back(Flow(1, 2));
     flows.push_back(Flow(2, 2));
     flows.push_back(Flow(3, 2));
+    //flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
     //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -41,10 +42,10 @@ void hierarchicalQueue::setPktCount(int pktCount) {
 
 void hierarchicalQueue::enque(Packet* packet) {
 
-    fprintf(stderr, "AAAAA Start Enqueue\n"); // Debug: Peixuan 07062019
-
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
+
+    fprintf(stderr, "AAAAA Start Enqueue Flow %d Packet\n", iph->saddr()); // Debug: Peixuan 07062019
 
     ///////////////////////////////////////////////////
     // TODO: get theory departure Round
@@ -92,6 +93,7 @@ void hierarchicalQueue::enque(Packet* packet) {
     }
 
     setPktCount(pktCount + 1);
+    fprintf(stderr, "Packet Count ++\n");
 
     fprintf(stderr, "Finish Enqueue\n"); // Debug: Peixuan 07062019
 }
@@ -106,17 +108,21 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     // Peixuan 06242019
     // For simplicity, we assume flow id = the index of array 'flows'
 
-    fprintf(stderr, "+++++Calculate Departure Round\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "$$$$$Calculate Departure Round at VC = %d\n", currentRound); // Debug: Peixuan 07062019
 
     int curFlowID = iph->flowid();
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
     int curStartRound = max(currentRound, curLastDepartureRound);
+
+    fprintf(stderr, "$$$$$Last Departure Round of Flow%d = %d\n",iph->saddr() , curLastDepartureRound); // Debug: Peixuan 07062019
+    fprintf(stderr, "$$$$$Start Departure Round of Flow%d = %d\n",iph->saddr() , curStartRound); // Debug: Peixuan 07062019
+
     //int curDeaprtureRound = (int)(curStartRound + pkt_size/curWeight); // TODO: This line needs to take another thought
 
     int curDeaprtureRound = (int)(curStartRound + curWeight); // 07072019 Peixuan: basic test
 
-    fprintf(stderr, "$$$$$Calculated Departure Round = %d\n", curDeaprtureRound); // Debug: Peixuan 07062019
+    fprintf(stderr, "$$$$$Calculated Packet From Flow:%d with Departure Round = %d\n",iph->saddr() , curDeaprtureRound); // Debug: Peixuan 07062019
     // TODO: need packet length and bandwidh relation
     flows[curFlowID].setLastDepartureRound(curDeaprtureRound);
     return curDeaprtureRound;
@@ -148,6 +154,7 @@ Packet* hierarchicalQueue::deque() {
     pktCurRound.erase(pktCurRound.begin());
 
     setPktCount(pktCount - 1);
+    fprintf(stderr, "Packet Count --\n");
 
     hdr_ip* iph = hdr_ip::access(p);
     fprintf(stderr, "*****Dequeue Packet p with soure IP: %x\n", iph->saddr()); // Debug: Peixuan 07062019
@@ -182,17 +189,22 @@ vector<Packet*> hierarchicalQueue::runRound() {
 
     // Debug: Peixuan 07062019: Bug Founded: What if the queue is empty at the moment? Check Size!
     
-    fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
+    //fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
 
     Packet* p = levels[0].deque();
 
-    fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
+    //fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
 
     if (!p) {
         fprintf(stderr, "No packet\n"); // Debug: Peixuan 07062019
     }
 
     while (p) {
+
+        hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+        fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 0\n", iph->saddr()); // Debug: Peixuan 07092019
+
         result.push_back(p);
         p = levels[0].deque();
     }
@@ -266,6 +278,11 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             if (p == 0)
                 break;
             result.push_back(p);
+
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From FIFO 5 in Level 1\n", iph->saddr()); // Debug: Peixuan 07092019
+
         }
         decadeLevel.getAndIncrementIndex();
     }
@@ -275,6 +292,9 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             Packet* p = levels[1].deque();
             if (p == 0)
                 break;
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 1\n", iph->saddr()); // Debug: Peixuan 07092019
             result.push_back(p);
         }
     }
@@ -286,6 +306,9 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             Packet* p = hundredLevel.deque();
             if (p == 0)
                 break;
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From FIFO 5 Level 2\n", iph->saddr()); // Debug: Peixuan 07092019
             result.push_back(p);
         }
         if (currentRound % 10 == 9)
@@ -297,6 +320,9 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             Packet* p = levels[2].deque();
             if (p == 0)
                 break;
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 2\n", iph->saddr()); // Debug: Peixuan 07092019
             result.push_back(p);
         }
     }
