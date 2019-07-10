@@ -7,6 +7,15 @@
 Flow::Flow(int id, float weight) {
     this->flowId = id;
     this->weight = weight;
+    this->brustness = DEFAULT_BRUSTNESS;
+    this->insertLevel = 0;
+    this->lastDepartureRound = 0;
+}
+
+Flow::Flow(int id, float weight, int brustness) {
+    this->flowId = id;
+    this->weight = weight;
+    this->brustness = brustness;
     this->insertLevel = 0;
     this->lastDepartureRound = 0;
 }
@@ -34,3 +43,12 @@ int Flow::getInsertLevel() const {
 void Flow::setInsertLevel(int insertLevel) {
     Flow::insertLevel = insertLevel;
 }
+
+int Flow::getBrustness() const {
+    return brustness;
+} // 07102019 Peixuan: control flow brustness level
+
+
+void Flow::setBrustness(int brustness) {
+    Flow::brustness = brustness;
+} // 07102019 Peixuan: control flow brustness level

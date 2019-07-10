@@ -18,13 +18,13 @@ hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
 hierarchicalQueue::hierarchicalQueue(int volume) {
     fprintf(stderr, "Created new HCS instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
-    flows.push_back(Flow(0, 20));
-    flows.push_back(Flow(1, 20));
-    flows.push_back(Flow(2, 20));
-    flows.push_back(Flow(3, 20));
-    flows.push_back(Flow(4, 20));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(5, 20));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(6, 20));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(0, 2));
+    flows.push_back(Flow(1, 2));
+    flows.push_back(Flow(2, 2));
+    flows.push_back(Flow(3, 2, 100));
+    flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(5, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(6, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
     //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -71,6 +71,15 @@ void hierarchicalQueue::enque(Packet* packet) {
         return;   // 07072019 Peixuan: exceeds the maximum round
     }
 
+    
+    int curFlowID = iph->saddr();   // use source IP as flow id
+    int curBrustness = flows[curFlowID].getBrustness();
+    if ((departureRound - currentRound) >= curBrustness) {
+        fprintf(stderr, "?????Exceeds maximum brustness, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
+        drop(packet);
+        return;   // 07102019 Peixuan: exceeds the maximum brustness
+    }
+
     if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
         fprintf(stderr, "Enqueue Level 2\n"); // Debug: Peixuan 07072019
         if (departureRound / 100 % 10 == 5) {
@@ -113,7 +122,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
     fprintf(stderr, "$$$$$Calculate Departure Round at VC = %d\n", currentRound); // Debug: Peixuan 07062019
 
-    int curFlowID = iph->flowid();
+    int curFlowID = iph->saddr();   // use source IP as flow id
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
     int curStartRound = max(currentRound, curLastDepartureRound);
