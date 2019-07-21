@@ -20,6 +20,7 @@ public:
     void enque(Packet* packet, int index);
     Packet* deque();
     int getCurrentIndex();
+    void setCurrentIndex(int index);             // 07212019 Peixuan: set serving FIFO (especially for convergence FIFO)
     void getAndIncrementIndex();
     int getCurrentFifoSize();
     bool isCurrentFifoEmpty();

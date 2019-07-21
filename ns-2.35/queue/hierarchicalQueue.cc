@@ -42,8 +42,8 @@ void hierarchicalQueue::setPktCount(int pktCount) {
     this->pktCount = pktCount;
 }
 
-void hierarchicalQueue::enque(Packet* packet) {
-
+void hierarchicalQueue::enque(Packet* packet) {   
+    
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
 
@@ -172,6 +172,10 @@ Packet* hierarchicalQueue::deque() {
 
     hdr_ip* iph = hdr_ip::access(p);
     fprintf(stderr, "*****Dequeue Packet p with soure IP: %x\n", iph->saddr()); // Debug: Peixuan 07062019
+
+    // Printing sequence test
+    // hdr_tcp* tcph = hdr_tcp::access(p);
+
     return p;
 
 
@@ -202,6 +206,18 @@ vector<Packet*> hierarchicalQueue::runRound() {
     vector<Packet*> result;
 
     // Debug: Peixuan 07062019: Bug Founded: What if the queue is empty at the moment? Check Size!
+
+    //current round done
+
+    vector<Packet*> upperLevelPackets = serveUpperLevel(currentRound);
+
+    // Peixuan
+    /*for (int i = 0; i < upperLevelPackets.size(); i++) {
+        packetNumRecord.push_back(packetNum);
+        packetNum--;
+    }*/
+
+    result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());
     
     //fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
 
@@ -223,18 +239,20 @@ vector<Packet*> hierarchicalQueue::runRound() {
         p = levels[0].deque();
     }
 
-    levels[0].getAndIncrementIndex();
+    levels[0].getAndIncrementIndex();               // Level 0 move to next FIFO
 
     if (levels[0].getCurrentIndex() == 0) {
-        levels[1].getAndIncrementIndex();
+        levels[1].getAndIncrementIndex();           // Level 1 move to next FIFO
 
         if (levels[1].getCurrentIndex() == 0)
-            levels[2].getAndIncrementIndex();
+            levels[2].getAndIncrementIndex();       // Level 2 move to next FIFO
     }
 
+    // 07212019 Change Serving Order
+    
     //current round done
 
-    vector<Packet*> upperLevelPackets = serveUpperLevel(currentRound);
+    //0721 vector<Packet*> upperLevelPackets = serveUpperLevel(currentRound);
 
     // Peixuan
     /*for (int i = 0; i < upperLevelPackets.size(); i++) {
@@ -242,7 +260,9 @@ vector<Packet*> hierarchicalQueue::runRound() {
         packetNum--;
     }*/
 
-    result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());
+    //0721 result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());
+
+    // 07212019 Change Serving Order
 
     //Packet p = runCycle(); Peixuan
     // backup cycle for the idling situation
@@ -284,7 +304,61 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
 
     // ToDo: swap the order of serving levels
 
-    // first level 1
+    //First: then level 2
+    if (currentRound / 100 % 10 == 5) {
+        int size = static_cast<int>(ceil(hundredLevel.getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));
+        for (int i = 0; i < size; i++) {
+            Packet* p = hundredLevel.deque();
+            if (p == 0)
+                break;
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From FIFO 5 Level 2\n", iph->saddr()); // Debug: Peixuan 07092019
+            result.push_back(p);
+        }
+        if (currentRound % 10 == 9)
+            hundredLevel.getAndIncrementIndex();
+
+        // 07212019 Peixuan: fix convergence FIFO
+        
+        /* Packet* p = hundredLevel.deque();
+
+        //fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
+
+        if (!p) {
+            fprintf(stderr, "No packet in Level 2 Convergence FIFO\n"); // Debug: Peixuan 07062019
+        }
+        
+        while (p) {
+
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 2 Convergence FIFO\n", iph->saddr()); // Debug: Peixuan 07092019
+
+            result.push_back(p);
+            p = hundredLevel.deque();
+        }
+
+        fprintf(stderr, ">>>>> Out L1F5 while loop in round %d\n", currentRound); // Debug: Peixuan 07212019
+
+        if (currentRound % 10 == 9)
+            hundredLevel.getAndIncrementIndex();*/
+
+    }
+    else if (!levels[2].isCurrentFifoEmpty()) {
+        int size = static_cast<int>(ceil(levels[2].getCurrentFifoSize() * 1.0 / (100 - currentRound % 100)));
+        for (int i = 0; i < size; i++) {
+            Packet* p = levels[2].deque();
+            if (p == 0)
+                break;
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 2\n", iph->saddr()); // Debug: Peixuan 07092019
+            result.push_back(p);
+        }
+    }
+
+    //Then: first level 1
     if (currentRound / 10 % 10 == 5) {
         int size = decadeLevel.getCurrentFifoSize();
         for (int i = 0; i < size; i++) {
@@ -299,6 +373,32 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
 
         }
         decadeLevel.getAndIncrementIndex();
+
+        // 07212019 Peixuan: fix convergence FIFO
+
+
+        /*Packet* p = decadeLevel.deque();
+
+        //fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
+
+        if (!p) {
+            fprintf(stderr, "No packet in Level 1 Convergence FIFO\n"); // Debug: Peixuan 07062019
+        }
+        
+        while (p) {
+
+            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
+
+            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 1 Convergence FIFO\n", iph->saddr()); // Debug: Peixuan 07092019
+
+            result.push_back(p);
+            p = decadeLevel.deque();
+        }
+
+        fprintf(stderr, ">>>>> Out L2F5 while loop in round %d\n", currentRound); // Debug: Peixuan 07212019
+
+        decadeLevel.getAndIncrementIndex();*/
+        
     }
     else if (!levels[1].isCurrentFifoEmpty()) {
         int size = static_cast<int>(ceil(levels[1].getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));
@@ -313,33 +413,7 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
         }
     }
 
-    //then level 2
-    if (currentRound / 100 % 10 == 5) {
-        int size = static_cast<int>(ceil(hundredLevel.getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));
-        for (int i = 0; i < size; i++) {
-            Packet* p = hundredLevel.deque();
-            if (p == 0)
-                break;
-            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
-
-            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From FIFO 5 Level 2\n", iph->saddr()); // Debug: Peixuan 07092019
-            result.push_back(p);
-        }
-        if (currentRound % 10 == 9)
-            hundredLevel.getAndIncrementIndex();
-    }
-    else if (!levels[2].isCurrentFifoEmpty()) {
-        int size = static_cast<int>(ceil(levels[2].getCurrentFifoSize() * 1.0 / (100 - currentRound % 100)));
-        for (int i = 0; i < size; i++) {
-            Packet* p = levels[2].deque();
-            if (p == 0)
-                break;
-            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
-
-            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 2\n", iph->saddr()); // Debug: Peixuan 07092019
-            result.push_back(p);
-        }
-    }
+   
 
     return result;
 }
