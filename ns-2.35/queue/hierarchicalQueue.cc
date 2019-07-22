@@ -322,7 +322,8 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             result.push_back(p);
         }
 
-        if (hundredLevel.getCurrentFifoSize())  // 07212019 Peixuan ***: If hundredLevel not empty, serve it until it is empty
+        if (hundredLevel.getCurrentFifoSize() && currentRound / 10 % 10 != 5)  // 07222019 Peixuan ***: If hundredLevel not empty, serve it until it is empty (Except Level 1 is serving Convergence FIFO (decade FIFO))
+        //if (hundredLevel.getCurrentFifoSize())  // 07212019 Peixuan ***: If hundredLevel not empty, serve it until it is empty
             return result;                      // 07212019 Peixuan ***
 
         if (currentRound % 10 == 9)
@@ -370,6 +371,7 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
     //Then: first level 1
     if (currentRound / 10 % 10 == 5) {
         int size = decadeLevel.getCurrentFifoSize();
+        fprintf(stderr, ">>>>>At Round:%d, Serve Level 1 Convergence FIFO with fifo: %d, size: %d\n", currentRound, decadeLevel.getCurrentIndex(), size); // Debug: Peixuan 07222019
         for (int i = 0; i < size; i++) {
             Packet* p = decadeLevel.deque();
             if (p == 0)
@@ -412,6 +414,7 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
     else if (!levels[1].isCurrentFifoEmpty()) {
         int size = static_cast<int>(ceil(levels[1].getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));   // 07212019 Peixuan *** Fix Level 1 serving order (ori)
         //int size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levels[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 1 serving order (fixed)
+        fprintf(stderr, ">>>At Round:%d, Serve Level 1 Regular FIFO with fifo: %d, size: %d\n", currentRound, levels[1].getCurrentIndex(), size); // Debug: Peixuan 07222019
         for (int i = 0; i < size; i++) {
             Packet* p = levels[1].deque();
             if (p == 0)
