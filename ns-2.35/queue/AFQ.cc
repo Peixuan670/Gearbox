@@ -1,22 +1,22 @@
 #include <cmath>
 
-#include "hierarchicalQueue.h"
+#include "AFQ.h"
 
-static class hierarchicalQueueClass : public TclClass {
+static class AFQClass : public TclClass {
 public:
-        hierarchicalQueueClass() : TclClass("Queue/HRCC") {}
+        AFQClass() : TclClass("Queue/AFQ") {}
         TclObject* create(int, const char*const*) {
-            fprintf(stderr, "Created new TCL HCS instance\n"); // Debug: Peixuan 07062019
-	        return (new hierarchicalQueue);
+            fprintf(stderr, "Created new TCL AFQ instance\n"); // Debug: Peixuan 07062019
+	        return (new AFQ);
 	}
 } class_hierarchical_queue;
 
-hierarchicalQueue::hierarchicalQueue():hierarchicalQueue(DEFAULT_VOLUME) {
-    fprintf(stderr, "Created new HCS instance\n"); // Debug: Peixuan 07062019
+AFQ::AFQ():AFQ(DEFAULT_VOLUME) {
+    fprintf(stderr, "Created new AFQ instance\n"); // Debug: Peixuan 07062019
 }
 
-hierarchicalQueue::hierarchicalQueue(int volume) {
-    fprintf(stderr, "Created new HCS instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
+AFQ::AFQ(int volume) {
+    fprintf(stderr, "Created new AFQ instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
     flows.push_back(Flow(0, 2, 100));
     flows.push_back(Flow(1, 2, 100));
@@ -32,17 +32,17 @@ hierarchicalQueue::hierarchicalQueue(int volume) {
     //pktCurRound = new vector<Packet*>;
 }
 
-void hierarchicalQueue::setCurrentRound(int currentRound) {
+void AFQ::setCurrentRound(int currentRound) {
     fprintf(stderr, "Set Current Round: %d\n", currentRound); // Debug: Peixuan 07062019
     this->currentRound = currentRound;
 }
 
-void hierarchicalQueue::setPktCount(int pktCount) {
+void AFQ::setPktCount(int pktCount) {
     fprintf(stderr, "Set Packet Count: %d\n", pktCount); // Debug: Peixuan 07072019
     this->pktCount = pktCount;
 }
 
-void hierarchicalQueue::enque(Packet* packet) {   
+void AFQ::enque(Packet* packet) {   
     
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
@@ -61,15 +61,22 @@ void hierarchicalQueue::enque(Packet* packet) {
     */
 
     int flowId = iph->flowid();
-    int insertLevel = flows[flowId].getInsertLevel();
+    //int insertLevel = flows[flowId].getInsertLevel(); //HCS->AFQ
+    int insertLevel = 0;
 
     departureRound = max(departureRound, currentRound);
 
-    if ((departureRound / 100 - currentRound / 100) >= 10) {
+    if ((departureRound - currentRound) >= 10) {
         fprintf(stderr, "?????Exceeds maximum round, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
         drop(packet);
         return;   // 07072019 Peixuan: exceeds the maximum round
     }
+    
+    /* if ((departureRound / 100 - currentRound / 100) >= 10) {
+        fprintf(stderr, "?????Exceeds maximum round, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
+        drop(packet);
+        return;   // 07072019 Peixuan: exceeds the maximum round
+    }*/ //07252019 HCS->AFQ
 
     
     int curFlowID = iph->saddr();   // use source IP as flow id
@@ -82,7 +89,7 @@ void hierarchicalQueue::enque(Packet* packet) {
 
     flows[curFlowID].setLastDepartureRound(departureRound);     // 07102019 Peixuan: only update last packet finish time if the packet wasn't dropped
 
-    if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
+    /* if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
         fprintf(stderr, "Enqueue Level 2\n"); // Debug: Peixuan 07072019
         if (departureRound / 100 % 10 == 5) {
             flows[flowId].setInsertLevel(1);
@@ -104,7 +111,19 @@ void hierarchicalQueue::enque(Packet* packet) {
         fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
         flows[flowId].setInsertLevel(0);
         levels[0].enque(packet, departureRound % 10);
+    } */
+
+    if ((departureRound - currentRound) < 10) {
+        fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
+        flows[flowId].setInsertLevel(0);
+        levels[0].enque(packet, departureRound % 10);
+    } else {
+        fprintf(stderr, "?????Exceeds maximum brustness, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
+        drop(packet);
+        return;   // 07102019 Peixuan: exceeds the maximum brustness
     }
+
+
 
     setPktCount(pktCount + 1);
     fprintf(stderr, "Packet Count ++\n");
@@ -113,7 +132,7 @@ void hierarchicalQueue::enque(Packet* packet) {
 }
 
 // Peixuan: This can be replaced by any other algorithms
-int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
+int AFQ::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     //int		fid_;	/* flow id */
     //int		prio_;
     // parameters in iph
@@ -146,7 +165,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
 //06262019 Static getting all the departure packet in this virtual clock unit (JUST FOR SIMULATION PURPUSE!)
 
-Packet* hierarchicalQueue::deque() {
+Packet* AFQ::deque() {
 
     fprintf(stderr, "Start Dequeue\n"); // Debug: Peixuan 07062019
 
@@ -199,7 +218,7 @@ Packet* hierarchicalQueue::deque() {
 }
 
 // Peixuan: now we only call this function to get the departure packet in the next round
-vector<Packet*> hierarchicalQueue::runRound() {
+vector<Packet*> AFQ::runRound() {
 
     fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
 
@@ -209,7 +228,7 @@ vector<Packet*> hierarchicalQueue::runRound() {
 
     //current round done
 
-    vector<Packet*> upperLevelPackets = serveUpperLevel(currentRound);
+    //vector<Packet*> upperLevelPackets = serveUpperLevel(currentRound);    // HCS -> AFQ
 
     // Peixuan
     /*for (int i = 0; i < upperLevelPackets.size(); i++) {
@@ -217,7 +236,7 @@ vector<Packet*> hierarchicalQueue::runRound() {
         packetNum--;
     }*/
 
-    result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());
+    //result.insert(result.end(), upperLevelPackets.begin(), upperLevelPackets.end());  // HCS -> AFQ
     
     //fprintf(stderr, "Extracting packet\n"); // Debug: Peixuan 07062019
 
@@ -242,14 +261,14 @@ vector<Packet*> hierarchicalQueue::runRound() {
     levels[0].getAndIncrementIndex();               // Level 0 move to next FIFO
     fprintf(stderr, "<<<<<At Round:%d, Level 0 update current FIFO as: fifo %d\n", currentRound, levels[0].getCurrentIndex()); // Debug: Peixuan 07212019
 
-    if (levels[0].getCurrentIndex() == 0) {
+    /* if (levels[0].getCurrentIndex() == 0) {
         levels[1].getAndIncrementIndex();           // Level 1 move to next FIFO
         fprintf(stderr, "<<<<<At Round:%d, Level 1 update current FIFO as: fifo %d\n", currentRound, levels[1].getCurrentIndex()); // Debug: Peixuan 07212019
 
         if (levels[1].getCurrentIndex() == 0)
             levels[2].getAndIncrementIndex();       // Level 2 move to next FIFO
             fprintf(stderr, "<<<<<At Round:%d, Level 2 update current FIFO as: fifo %d\n", currentRound, levels[2].getCurrentIndex()); // Debug: Peixuan 07212019
-    }
+    }*/ // HCS -> AFQ
 
     // 07212019 Change Serving Order
     
@@ -299,7 +318,7 @@ vector<Packet*> hierarchicalQueue::runRound() {
 
 //Peixuan: This is also used to get the packet served in this round (VC unit)
 // We need to adjust the order of serving: level0 -> level1 -> level2
-vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
+/* vector<Packet*> AFQ::serveUpperLevel(int currentRound) {
 
     fprintf(stderr, "Serving Upper Level\n"); // Debug: Peixuan 07062019
 
@@ -328,31 +347,6 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
 
         if (currentRound % 10 == 9)
             hundredLevel.getAndIncrementIndex();
-
-        // 07212019 Peixuan: fix convergence FIFO
-        
-        /* Packet* p = hundredLevel.deque();
-
-        //fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
-
-        if (!p) {
-            fprintf(stderr, "No packet in Level 2 Convergence FIFO\n"); // Debug: Peixuan 07062019
-        }
-        
-        while (p) {
-
-            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
-
-            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 2 Convergence FIFO\n", iph->saddr()); // Debug: Peixuan 07092019
-
-            result.push_back(p);
-            p = hundredLevel.deque();
-        }
-
-        fprintf(stderr, ">>>>> Out L1F5 while loop in round %d\n", currentRound); // Debug: Peixuan 07212019
-
-        if (currentRound % 10 == 9)
-            hundredLevel.getAndIncrementIndex();*/
 
     }
     else if (!levels[2].isCurrentFifoEmpty()) {
@@ -384,31 +378,6 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
 
         }
         decadeLevel.getAndIncrementIndex();
-
-        // 07212019 Peixuan: fix convergence FIFO
-
-
-        /*Packet* p = decadeLevel.deque();
-
-        //fprintf(stderr, "Get packet pointer\n"); // Debug: Peixuan 07062019
-
-        if (!p) {
-            fprintf(stderr, "No packet in Level 1 Convergence FIFO\n"); // Debug: Peixuan 07062019
-        }
-        
-        while (p) {
-
-            hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
-
-            fprintf(stderr, "^^^^^ Round Deque Flow %d Packet From Level 1 Convergence FIFO\n", iph->saddr()); // Debug: Peixuan 07092019
-
-            result.push_back(p);
-            p = decadeLevel.deque();
-        }
-
-        fprintf(stderr, ">>>>> Out L2F5 while loop in round %d\n", currentRound); // Debug: Peixuan 07212019
-
-        decadeLevel.getAndIncrementIndex();*/
         
     }
     else if (!levels[1].isCurrentFifoEmpty()) {
@@ -429,7 +398,7 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
    
 
     return result;
-}
+}*/   // HCS -> AFQ
 
 
 // This is the trail to implement the real logic

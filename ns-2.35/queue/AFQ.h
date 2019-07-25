@@ -4,26 +4,29 @@
 
 using namespace std;
 
-class hierarchicalQueue : public Queue {
+class AFQ : public Queue {
 private:
-    static const int DEFAULT_VOLUME = 3;
+    static const int DEFAULT_VOLUME = 1;
     int volume;                     // num of levels in scheduler
     int currentRound;           // current Round
     int pktCount;           // packet count
-    Level levels[3];
-    Level hundredLevel;
-    Level decadeLevel;
+    //Level levels[3];
+    Level levels[1];
+    //Level hundredLevel;
+    //Level decadeLevel;
     vector<Flow> flows;
     //06262019 Peixuan
     vector<Packet*> pktCurRound;
 
     // 06262019 Peixuan
     vector<Packet*> runRound();
-    vector<Packet*> serveUpperLevel(int);
+    //vector<Packet*> serveUpperLevel(int); // HCS -> AFQ
     void setPktCount(int);
 public:
-    hierarchicalQueue();
-    explicit hierarchicalQueue(int);
+    //hierarchicalQueue();
+    //explicit hierarchicalQueue(int);
+    AFQ();
+    explicit AFQ(int);
     void enque(Packet*);
     Packet* deque();
     void setCurrentRound(int);
