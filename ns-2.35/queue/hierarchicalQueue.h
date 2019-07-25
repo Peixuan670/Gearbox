@@ -10,9 +10,19 @@ private:
     int volume;                     // num of levels in scheduler
     int currentRound;           // current Round
     int pktCount;           // packet count
+
     Level levels[3];
+    Level levelsB[2];       // Back up Levels
+
     Level hundredLevel;
     Level decadeLevel;
+
+    //Level hundredLevelB;    // Back up Levels
+    //Level decadeLevelB;     // Back up Levels
+
+    bool level0ServingB;          // is serve Back up Levels
+    bool level1ServingB;          // is serve Back up Levels
+
     vector<Flow> flows;
     //06262019 Peixuan
     vector<Packet*> pktCurRound;
