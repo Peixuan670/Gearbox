@@ -35,6 +35,12 @@ hierarchicalQueue::hierarchicalQueue(int volume) {
 void hierarchicalQueue::setCurrentRound(int currentRound) {
     fprintf(stderr, "Set Current Round: %d\n", currentRound); // Debug: Peixuan 07062019
     this->currentRound = currentRound;
+
+    level0ServingB = ((int)(currentRound/10)%2);
+    level1ServingB = ((int)(currentRound/100)%2);
+
+    fprintf(stderr, "Set Round: %d, level 0 serving B = %d, level 1 serving B = %d.\n", currentRound, level0ServingB, level1ServingB); // Debug: Peixuan 07062019
+
 }
 
 void hierarchicalQueue::setPktCount(int pktCount) {
@@ -82,6 +88,8 @@ void hierarchicalQueue::enque(Packet* packet) {
 
     flows[curFlowID].setLastDepartureRound(departureRound);     // 07102019 Peixuan: only update last packet finish time if the packet wasn't dropped
 
+    fprintf(stderr, "At Round: %d, Enqueue Packet from Flow %d with Finish time = %d.\n", currentRound, iph->saddr(), departureRound); // Debug: Peixuan 07072019
+    
     /*if (departureRound / 100 != currentRound / 100 || insertLevel == 2) {
         fprintf(stderr, "Enqueue Level 2\n"); // Debug: Peixuan 07072019
         if (departureRound / 100 % 10 == 5) {
@@ -106,45 +114,59 @@ void hierarchicalQueue::enque(Packet* packet) {
         levels[0].enque(packet, departureRound % 10);
     }*/
 
+    int level0InsertingB = ((int)(departureRound/10)%2);
+    int level1InsertingB = ((int)(departureRound/100)%2);
+
+    fprintf(stderr, "Level 1 insert B: %d, Level 0 insert B: %d\n", level1InsertingB, level0InsertingB); // Debug: Peixuan 07072019
+
+
     if (departureRound / 100 - currentRound / 100 > 1 || insertLevel == 2) {
-        fprintf(stderr, "Enqueue Level 2\n"); // Debug: Peixuan 07072019
+        //fprintf(stderr, "Enqueue Level 2\n"); // Debug: Peixuan 07072019
         if (departureRound / 100 % 10 == 5) {
             flows[flowId].setInsertLevel(1);
             hundredLevel.enque(packet, departureRound / 10 % 10);
+            fprintf(stderr, "Enqueue Level 2, hundred FIFO, fifo %d\n", hundredLevel.getCurrentIndex()); // Debug: Peixuan 07072019
         } else {
             flows[flowId].setInsertLevel(2);
             levels[2].enque(packet, departureRound / 100 % 10);
+            fprintf(stderr, "Enqueue Level 2, regular FIFO, fifo %d\n", levels[2].getCurrentIndex()); // Debug: Peixuan 07072019
         }
     } else if (departureRound / 10 - currentRound / 10 > 1 || insertLevel == 1) {
-        if (!(int)(departureRound/100)%2) {
-            fprintf(stderr, "Enqueue Level 1\n"); // Debug: Peixuan 07072019
+        if (!level1InsertingB) {
+            //fprintf(stderr, "Enqueue Level 1\n"); // Debug: Peixuan 07072019
             if (departureRound / 10 % 10 == 5) {
                 flows[flowId].setInsertLevel(0);
                 decadeLevel.enque(packet, departureRound  % 10);
+                fprintf(stderr, "Enqueue Level 1, decede FIFO, fifo %d\n", decadeLevel.getCurrentIndex()); // Debug: Peixuan 07072019
             } else {
                 flows[flowId].setInsertLevel(1);
                 levels[1].enque(packet, departureRound / 10 % 10);
+                fprintf(stderr, "Enqueue Level 1, regular FIFO, fifo %d\n", levels[1].getCurrentIndex()); // Debug: Peixuan 07072019
             }
         } else {
-            fprintf(stderr, "Enqueue Level B 1\n"); // Debug: Peixuan 07072019
+            //fprintf(stderr, "Enqueue Level B 1\n"); // Debug: Peixuan 07072019
             if (departureRound / 10 % 10 == 5) {
                 flows[flowId].setInsertLevel(0);
                 decadeLevelB.enque(packet, departureRound  % 10);
+                fprintf(stderr, "Enqueue Level B 1, decede FIFO, fifo %d\n", decadeLevel.getCurrentIndex()); // Debug: Peixuan 07072019
             } else {
                 flows[flowId].setInsertLevel(1);
                 levelsB[1].enque(packet, departureRound / 10 % 10);
+                fprintf(stderr, "Enqueue Level B 1, regular FIFO, fifo %d\n", levels[1].getCurrentIndex()); // Debug: Peixuan 07072019
             }
         }
 
     } else {
-        if (!(int)(departureRound/10)%2) {
-            fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
+        if (!level0InsertingB) {
+            //fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
             flows[flowId].setInsertLevel(0);
             levels[0].enque(packet, departureRound % 10);
+            fprintf(stderr, "Enqueue Level 0, regular FIFO, fifo %d\n", levels[0].getCurrentIndex()); // Debug: Peixuan 07072019
         } else {
-            fprintf(stderr, "Enqueue Level B 0\n"); // Debug: Peixuan 07072019
+            //fprintf(stderr, "Enqueue Level B 0\n"); // Debug: Peixuan 07072019
             flows[flowId].setInsertLevel(0);
             levelsB[0].enque(packet, departureRound % 10);
+            fprintf(stderr, "Enqueue Level B 0, regular FIFO, fifo %d\n", levels[0].getCurrentIndex()); // Debug: Peixuan 07072019
         }
         
     }
@@ -179,7 +201,7 @@ int hierarchicalQueue::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
     int curDeaprtureRound = (int)(curStartRound + curWeight); // 07072019 Peixuan: basic test
 
-    fprintf(stderr, "$$$$$Calculated Packet From Flow:%d with Departure Round = %d\n",iph->saddr() , curDeaprtureRound); // Debug: Peixuan 07062019
+    fprintf(stderr, "$$$$$At Round: %d, Calculated Packet From Flow:%d with Departure Round = %d\n", currentRound, iph->saddr(), curDeaprtureRound); // Debug: Peixuan 07062019
     // TODO: need packet length and bandwidh relation
     //flows[curFlowID].setLastDepartureRound(curDeaprtureRound);
     return curDeaprtureRound;
@@ -200,11 +222,23 @@ Packet* hierarchicalQueue::deque() {
         return 0;
     }
 
-    while (!pktCurRound.size()) {
+    int i = 0; // 07252019 loop debug
+
+    while (!pktCurRound.size()) {   // 07252019 loop debug
+    //while (!pktCurRound.size() && i < 1000) {   // 07252019 loop debug
         fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019
         pktCurRound = this->runRound();
         this->setCurrentRound(currentRound + 1); // Update system virtual clock
+
+        level0ServingB = ((int)(currentRound/10)%2);
+        level1ServingB = ((int)(currentRound/100)%2);
+
+        fprintf(stderr, "Now update Round: %d, level 0 serving B = %d, level 1 serving B = %d.\n", currentRound, level0ServingB, level1ServingB); // Debug: Peixuan 07062019
         //this->deque();
+        i++; // 07252019 loop debug
+        if (i > 1000) { // 07252019 loop debug
+            return 0;   // 07252019 loop debug
+        }   // 07252019 loop debug
     }
 
     Packet *p = pktCurRound.front();
@@ -245,9 +279,6 @@ Packet* hierarchicalQueue::deque() {
 vector<Packet*> hierarchicalQueue::runRound() {
 
     fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
-
-    level0ServingB = ((int)(currentRound/10)%2);
-    level1ServingB = ((int)(currentRound/100)%2);
 
     vector<Packet*> result;
 
@@ -310,18 +341,18 @@ vector<Packet*> hierarchicalQueue::runRound() {
 
             hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
 
-            fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level 0: fifo %d\n", currentRound, iph->saddr(), levelsB[0].getCurrentIndex()); // Debug: Peixuan 07092019
+            fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level B 0: fifo %d\n", currentRound, iph->saddr(), levelsB[0].getCurrentIndex()); // Debug: Peixuan 07092019
 
             result.push_back(p);
             p = levelsB[0].deque();
         }
 
-        level0ServingB[0].getAndIncrementIndex();               // Level 0 move to next FIFO
-        fprintf(stderr, "<<<<<At Round:%d, Level 0 update current FIFO as: fifo %d\n", currentRound, levelsB[0].getCurrentIndex()); // Debug: Peixuan 07212019
+        levelsB[0].getAndIncrementIndex();               // Level 0 move to next FIFO
+        fprintf(stderr, "<<<<<At Round:%d, Level B 0 update current FIFO as: fifo %d\n", currentRound, levelsB[0].getCurrentIndex()); // Debug: Peixuan 07212019
 
         if (levelsB[0].getCurrentIndex() == 0) {
             levelsB[1].getAndIncrementIndex();           // Level 1 move to next FIFO
-            fprintf(stderr, "<<<<<At Round:%d, Level 1 update current FIFO as: fifo %d\n", currentRound, levelsB[1].getCurrentIndex()); // Debug: Peixuan 07212019
+            fprintf(stderr, "<<<<<At Round:%d, Level B 1 update current FIFO as: fifo %d\n", currentRound, levelsB[1].getCurrentIndex()); // Debug: Peixuan 07212019
 
             if (levelsB[1].getCurrentIndex() == 0)
                 levelsB[2].getAndIncrementIndex();       // Level 2 move to next FIFO
@@ -391,11 +422,15 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
         //int size = static_cast<int>(ceil(hundredLevel.getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (ori)
         //int size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levels[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (fixed)
 
+        int size = 0;
+
         if (!level1ServingB) {
-            int size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levels[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (fixed)
+            size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levels[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (fixed)
         } else {
-            int size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levelsB[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (fixed)
+            size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levelsB[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (fixed)
         }
+
+        //size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levels[1].getCurrentFifoSize() + levelsB[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 2 serving order (fixed)
 
         //int size = hundredLevel.getCurrentFifoSize();
         for (int i = 0; i < size; i++) {
@@ -473,7 +508,7 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
         } else {
             // serving backup decade level
             int size = decadeLevelB.getCurrentFifoSize();
-            fprintf(stderr, ">>>>>At Round:%d, Serve Level 1 Convergence FIFO with fifo: %d, size: %d\n", currentRound, decadeLevelB.getCurrentIndex(), size); // Debug: Peixuan 07222019
+            fprintf(stderr, ">>>>>At Round:%d, Serve Level B 1 Convergence FIFO with fifo: %d, size: %d\n", currentRound, decadeLevelB.getCurrentIndex(), size); // Debug: Peixuan 07222019
             for (int i = 0; i < size; i++) {
                 Packet* p = decadeLevelB.deque();
                 if (p == 0)
@@ -482,7 +517,7 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
 
                 hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
 
-                fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level 1 Convergence FIFO, fifo: %d\n", currentRound, iph->saddr(), decadeLevelB.getCurrentIndex()); // Debug: Peixuan 07092019
+                fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level B 1 Convergence FIFO, fifo: %d\n", currentRound, iph->saddr(), decadeLevelB.getCurrentIndex()); // Debug: Peixuan 07092019
 
             }
             decadeLevelB.getAndIncrementIndex();
@@ -536,14 +571,14 @@ vector<Packet*> hierarchicalQueue::serveUpperLevel(int currentRound) {
             if (!levelsB[1].isCurrentFifoEmpty()) {
                 int size = static_cast<int>(ceil(levelsB[1].getCurrentFifoSize() * 1.0 / (10 - currentRound % 10)));   // 07212019 Peixuan *** Fix Level 1 serving order (ori)
                 //int size = static_cast<int>(ceil((hundredLevel.getCurrentFifoSize() + levels[1].getCurrentFifoSize()) * 1.0 / (10 - currentRound % 10)));  // 07212019 Peixuan *** Fix Level 1 serving order (fixed)
-                fprintf(stderr, ">>>At Round:%d, Serve Level 1 Regular FIFO with fifo: %d, size: %d\n", currentRound, levelsB[1].getCurrentIndex(), size); // Debug: Peixuan 07222019
+                fprintf(stderr, ">>>At Round:%d, Serve Level 1 B Regular FIFO with fifo: %d, size: %d\n", currentRound, levelsB[1].getCurrentIndex(), size); // Debug: Peixuan 07222019
                 for (int i = 0; i < size; i++) {
                     Packet* p = levelsB[1].deque();
                     if (p == 0)
                         break;
                     hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
 
-                    fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level 1, fifo: %d\n", currentRound, iph->saddr(), levelsB[1].getCurrentIndex()); // Debug: Peixuan 07092019
+                    fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level B 1, fifo: %d\n", currentRound, iph->saddr(), levelsB[1].getCurrentIndex()); // Debug: Peixuan 07092019
                     result.push_back(p);
                 }  
             }

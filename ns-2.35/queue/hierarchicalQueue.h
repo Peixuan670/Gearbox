@@ -18,7 +18,7 @@ private:
     Level decadeLevel;
 
     //Level hundredLevelB;    // Back up Levels
-    //Level decadeLevelB;     // Back up Levels
+    Level decadeLevelB;     // Back up Levels
 
     bool level0ServingB;          // is serve Back up Levels
     bool level1ServingB;          // is serve Back up Levels
