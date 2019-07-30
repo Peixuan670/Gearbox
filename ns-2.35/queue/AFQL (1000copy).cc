@@ -18,10 +18,10 @@ AFQL::AFQL():AFQL(DEFAULT_VOLUME) {
 AFQL::AFQL(int volume) {
     fprintf(stderr, "Created new AFQL instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
-    flows.push_back(Flow(0, 2, 100));
-    flows.push_back(Flow(1, 2, 100));
-    flows.push_back(Flow(2, 2, 100));
-    flows.push_back(Flow(3, 2, 100));
+    flows.push_back(Flow(0, 2, 1000));
+    flows.push_back(Flow(1, 2, 1000));
+    flows.push_back(Flow(2, 2, 1000));
+    flows.push_back(Flow(3, 2, 1000));
     flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
     flows.push_back(Flow(5, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
     flows.push_back(Flow(6, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
@@ -113,10 +113,10 @@ void AFQL::enque(Packet* packet) {
         levels[0].enque(packet, departureRound % 10);
     } */
 
-    if ((departureRound - currentRound) < 100) {     // AFQ -> AFQL
+    if ((departureRound - currentRound) < 1000) {     // AFQ -> AFQL
         fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
         flows[flowId].setInsertLevel(0);
-        levels[0].enque(packet, departureRound/100 % 10);
+        levels[0].enque(packet, departureRound/1000 % 10);
     } else {
         fprintf(stderr, "?????Exceeds maximum brustness, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
         drop(packet);
