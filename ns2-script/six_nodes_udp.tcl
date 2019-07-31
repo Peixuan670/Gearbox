@@ -39,7 +39,7 @@ $ns duplex-link $n0 $n4 2Mb 3ms DropTail
 $ns duplex-link $n1 $n4 2Mb 3ms DropTail
 $ns duplex-link $n2 $n4 2Mb 3ms DropTail
 $ns duplex-link $n3 $n4 2Mb 3ms DropTail
-$ns duplex-link $n4 $n5 4Mb 3ms HRCC
+$ns duplex-link $n4 $n5 4Mb 3ms DropTail
 
 #set nodes position
 $ns duplex-link-op $n0 $n4 orient right-up
@@ -87,7 +87,7 @@ set cbr3 [new Application/Traffic/CBR]
 $cbr3 attach-agent $udp3
 $cbr3 set type_ CBR
 $cbr3 set packet_size_ 1000
-$cbr3 set rate_ 10mb
+$cbr3 set rate_ 1mb
 $cbr3 set random_ false
 $udp3 set fid_ 3
 
@@ -105,33 +105,17 @@ $cbr4 set rate_ 2mb
 $cbr4 set random_ false
 $udp4 set fid_ 4
 
-
-#set cbr5 [new Application/Traffic/CBR]
-#$cbr5 attach-agent $udp4
-#$cbr5 set type_ CBR
-#$cbr5 set packet_size_ 1000
-#$cbr5 set rate_ 1mb
-#$cbr5 set random_ false
-#$udp4 set fid_ 4
-
-
-
 #event
 $ns at .1 "$cbr1 start"
 $ns at .1 "$cbr2 start"
 $ns at .1 "$cbr3 start"
 $ns at .1 "$cbr4 start"
 
-#$ns at 12.1 "$cbr5 start"
-
 $ns at 2 "$cbr1 stop"
 $ns at 2 "$cbr2 stop"
 $ns at 2 "$cbr3 stop"
 $ns at 2 "$cbr4 stop"
 
-#$ns at 14.1 "$cbr5 stop"
-
-$ns at 5.1 "finish"
-#$ns at 15.1 "finish"
+$ns at 3.1 "finish"
 
 $ns run

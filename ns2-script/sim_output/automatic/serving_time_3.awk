@@ -28,7 +28,7 @@ BEGIN {
 	if (event == "-" && to_node == 5 && src_address == 3) {
 		departure_seq++
 		#printf("HCS Packet %d from Node %d, departure sequence = %d\n", seq_no, src_address, departure_seq)
-		printf("%d %d\n", seq_no, departure_seq)
+		printf("%d %f\n",seq_no, time)
 	}
 }                                                                                                           
 END {   	

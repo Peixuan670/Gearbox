@@ -45,7 +45,7 @@ set node_(s4) [$ns node]
 
 $ns duplex-link $node_(s1) $node_(r1) 5Mb 3ms DropTail 
 $ns duplex-link $node_(s2) $node_(r1) 5Mb 3ms DropTail 
-$ns duplex-link $node_(r1) $node_(r2) 2Mb 10ms TRY
+$ns duplex-link $node_(r1) $node_(r2) 2Mb 10ms DTRR
 $ns duplex-link $node_(s3) $node_(r2) 5Mb 3ms DropTail 
 $ns duplex-link $node_(s4) $node_(r2) 5Mb 3ms DropTail 
 
