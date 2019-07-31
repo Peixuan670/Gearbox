@@ -31,10 +31,10 @@ END {
         for(j=1 ; j<i ; j++){
 		if(j<50){
 			th = pkt_byte_sum[j] / (end_time[j] - start_time)*8/1000;
-			printf("%.2f\b%.2f\n", end_time[j], th);
+			printf("%.2f\t%.2f\n", end_time[j], th);
 		} else {
 			th = (pkt_byte_sum[j]-pkt_byte_sum[j-50]) / (end_time[j] - end_time[j-50])*8/1000;
-			printf("%.2f\b%.2f\n", end_time[j], th);
+			printf("%.2f\t%.2f\n", end_time[j], th);
 		}
 	}
 	printf("%.2f\t%.2f\n", end_time[i-1], 0);
