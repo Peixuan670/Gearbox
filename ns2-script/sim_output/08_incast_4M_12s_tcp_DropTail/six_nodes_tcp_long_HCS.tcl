@@ -41,6 +41,7 @@ $ns duplex-link $n2 $n4 2Mb 3ms DropTail
 $ns duplex-link $n3 $n4 12Mb 3ms DropTail
 $ns duplex-link $n4 $n5 4Mb 3ms HRCC
 #$ns duplex-link $n4 $n5 4Mb 3ms DropTail
+#$ns queue-limit $n4 $n5 500
 
 #set nodes position
 $ns duplex-link-op $n0 $n4 orient right-up
