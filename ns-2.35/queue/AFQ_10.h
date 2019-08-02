@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class AFQ : public Queue {
+class AFQ_10 : public Queue {
 private:
     static const int SET_NUMBER = 7;
     static const int SET_GRANULARITY = 7;       // TimeStamp Range of each queue set (level.cc)
@@ -27,8 +27,8 @@ private:
 public:
     //hierarchicalQueue();
     //explicit hierarchicalQueue(int);
-    AFQ();
-    explicit AFQ(int);
+    AFQ_10();
+    explicit AFQ_10(int);
     void enque(Packet*);
     Packet* deque();
     void setCurrentRound(int);

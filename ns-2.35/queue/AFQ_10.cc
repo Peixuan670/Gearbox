@@ -4,19 +4,19 @@
 
 static class AFQClass : public TclClass {
 public:
-        AFQClass() : TclClass("Queue/AFQ") {}
+        AFQ10Class() : TclClass("Queue/AFQ10") {}
         TclObject* create(int, const char*const*) {
-            fprintf(stderr, "Created new TCL AFQ instance\n"); // Debug: Peixuan 07062019
-	        return (new AFQ);
+            fprintf(stderr, "Created new TCL AFQ10 instance\n"); // Debug: Peixuan 07062019
+	        return (new AFQ_10);
 	}
 } class_hierarchical_queue;
 
-AFQ::AFQ():AFQ(DEFAULT_VOLUME) {
-    fprintf(stderr, "Created new AFQ instance\n"); // Debug: Peixuan 07062019
+AFQ_10::AFQ_10():AFQ_10(DEFAULT_VOLUME) {
+    fprintf(stderr, "Created new AFQ10 instance\n"); // Debug: Peixuan 07062019
 }
 
-AFQ::AFQ(int volume) {
-    fprintf(stderr, "Created new AFQ instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
+AFQ_10::AFQ_10(int volume) {
+    fprintf(stderr, "Created new AFQ10 instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
     flows.push_back(Flow(0, 2, 100));
     flows.push_back(Flow(1, 2, 100));
@@ -32,17 +32,17 @@ AFQ::AFQ(int volume) {
     //pktCurRound = new vector<Packet*>;
 }
 
-void AFQ::setCurrentRound(int currentRound) {
+void AFQ_10::setCurrentRound(int currentRound) {
     fprintf(stderr, "Set Current Round: %d\n", currentRound); // Debug: Peixuan 07062019
     this->currentRound = currentRound;
 }
 
-void AFQ::setPktCount(int pktCount) {
+void AFQ_10::setPktCount(int pktCount) {
     fprintf(stderr, "Set Packet Count: %d\n", pktCount); // Debug: Peixuan 07072019
     this->pktCount = pktCount;
 }
 
-void AFQ::enque(Packet* packet) {   
+void AFQ_10::enque(Packet* packet) {   
     
     hdr_ip* iph = hdr_ip::access(packet);
     int pkt_size = packet->hdrlen_ + packet->datalen();
@@ -100,7 +100,7 @@ void AFQ::enque(Packet* packet) {
 }
 
 // Peixuan: This can be replaced by any other algorithms
-int AFQ::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
+int AFQ_10::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     //int		fid_;	/* flow id */
     //int		prio_;
     // parameters in iph
@@ -133,7 +133,7 @@ int AFQ::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
 //06262019 Static getting all the departure packet in this virtual clock unit (JUST FOR SIMULATION PURPUSE!)
 
-Packet* AFQ::deque() {
+Packet* AFQ_10::deque() {
 
     fprintf(stderr, "Start Dequeue\n"); // Debug: Peixuan 07062019
 
@@ -165,7 +165,7 @@ Packet* AFQ::deque() {
 }
 
 // Peixuan: now we only call this function to get the departure packet in the next round
-vector<Packet*> AFQ::runRound() {
+vector<Packet*> AFQ_10::runRound() {
 
     fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
 
