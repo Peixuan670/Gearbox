@@ -7,7 +7,7 @@ using namespace std;
 class AFQ_10 : public Queue {
 private:
     static const int SET_NUMBER = 7;
-    static const int SET_GRANULARITY = 7;       // TimeStamp Range of each queue set (level.cc)
+    static const int SET_GRANULARITY = 10;       // TimeStamp Range of each queue set (level.cc)
     static const int DEFAULT_VOLUME = 7;
     int volume;                     // num of levels in scheduler
     int currentRound;           // current Round

@@ -85,9 +85,11 @@ void AFQ_10::enque(Packet* packet) {
     if ((departureRound - currentRound) < SET_GRANULARITY * SET_NUMBER) {
         //fprintf(stderr, "Enqueue Level 0\n"); // Debug: Peixuan 07072019
         int setID = (departureRound/SET_GRANULARITY) % SET_NUMBER;
+        fprintf(stderr, "departureRound/SET_GRANULARITY = %d/%d = %d\n", departureRound, SET_GRANULARITY, (departureRound/SET_GRANULARITY)); // Debug: Peixuan 07072019
         fprintf(stderr, "Enqueue Set %d\n", setID); // Debug: Peixuan 07072019
         //flows[flowId].setInsertLevel(0);
-        levels[setID].enque(packet, departureRound % SET_GRANULARITY);
+        int fifoGranularity = SET_GRANULARITY/10;
+        levels[setID].enque(packet, (departureRound/fifoGranularity) % 10);
     } else {
         fprintf(stderr, "?????Exceeds maximum brustness, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
         drop(packet);
@@ -171,7 +173,9 @@ vector<Packet*> AFQ_10::runRound() {
 
     vector<Packet*> result;
 
-    int curServeSet = currentRound / SET_NUMBER;    // Find the current serving set
+    int curServeSet = (currentRound / SET_GRANULARITY) % SET_NUMBER;    // Find the current serving set
+
+    fprintf(stderr, "Serving Set %d\n", curServeSet); // Debug: Peixuan 08022019
 
     Packet* p = levels[curServeSet].deque();
 
@@ -185,14 +189,14 @@ vector<Packet*> AFQ_10::runRound() {
 
         hdr_ip* iph = hdr_ip::access(p);                   // 07092019 Peixuan Debug
 
-        fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level 0: fifo %d\n", currentRound, iph->saddr(), levels[0].getCurrentIndex()); // Debug: Peixuan 07092019
+        fprintf(stderr, "^^^^^At Round:%d, Round Deque Flow %d Packet From Level %d: fifo %d\n", currentRound, iph->saddr(), curServeSet, levels[curServeSet].getCurrentIndex()); // Debug: Peixuan 07092019
 
         result.push_back(p);
-        p = levels[0].deque();
+        p = levels[curServeSet].deque();
     }
 
-    levels[0].getAndIncrementIndex();               // Level 0 move to next FIFO
-    fprintf(stderr, "<<<<<At Round:%d, Level 0 update current FIFO as: fifo %d\n", currentRound, levels[0].getCurrentIndex()); // Debug: Peixuan 07212019
+    levels[curServeSet].getAndIncrementIndex();               // Level 0 move to next FIFO
+    fprintf(stderr, "<<<<<At Round:%d, Level %d update current FIFO as: fifo %d\n", currentRound, curServeSet, levels[curServeSet].getCurrentIndex()); // Debug: Peixuan 07212019
 
     return result;
 }
