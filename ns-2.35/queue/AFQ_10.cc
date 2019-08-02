@@ -2,7 +2,7 @@
 
 #include "AFQ_10.h"
 
-static class AFQClass : public TclClass {
+static class AFQ10Class : public TclClass {
 public:
         AFQ10Class() : TclClass("Queue/AFQ10") {}
         TclObject* create(int, const char*const*) {
