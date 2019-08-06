@@ -24,7 +24,7 @@ struct cmp{
 
 static class PIFOlass : public TclClass {
 public:
-        AFQ10Class() : TclClass("Queue/PIFO") {}
+        PIFOClass() : TclClass("Queue/PIFO") {}
         TclObject* create(int, const char*const*) {
             fprintf(stderr, "Created new TCL PIFO instance\n"); // Debug: Peixuan 07062019
 	        return (new PIFO);
@@ -50,6 +50,7 @@ PIFO::PIFO(int volume) {
     currentRound = 0;
     pktCount = 0; // 07072019 Peixuan
     //pktCurRound = new vector<Packet*>;
+    priority_queue<unitPair, vector<unitPair>, cmp> pq = new priority_queue();
 }
 
 void PIFO::setCurrentRound(int currentRound) {
@@ -104,7 +105,11 @@ void PIFO::enque(Packet* packet) {
 
     // 08052019 PIFO Element
     //PIFOelement* element = new PIFOelement(packet, departureRound);
-    pq.push(unitPair(packet, departureRound));
+    //pq.push(unitPair(packet, departureRound));
+    struct Unit unit;
+    unit.packet = packet;
+    unit.finishTime = departureRound;
+    pq.push(unit);
 
 
 
@@ -173,9 +178,12 @@ Packet* PIFO::deque() {
         return 0;
     }
 
-    unitPair headUnit = pq.pop();
-    Packet *p = headUnit.first;
-    fprintf(stderr, "PIFO dequeue packet with Finish Time of %d\n", headUnit.second);
+    //unitPair headUnit = pq.pop();
+    //Packet *p = headUnit.first;
+    //fprintf(stderr, "PIFO dequeue packet with Finish Time of %d\n", headUnit.second);
+    struct Unit unit = pq.pop();
+    Packet packet = unit.packet;
+    fprintf(stderr, "PIFO dequeue packet with Finish Time of %d\n", unit.finishTime);
 
     /*while (!pktCurRound.size()) {
         fprintf(stderr, "Empty Round\n"); // Debug: Peixuan 07062019

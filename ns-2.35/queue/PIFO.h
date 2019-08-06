@@ -23,15 +23,28 @@ private:
 
     // 08052019
 
-    typedef pair<Packet*, int>unitPair;
+    /*typedef pair<Packet*, int>unitPair;
 
     struct cmp{
         bool operator() (unitPair a, unitPair b) {
             return (a.second < b.second);
         }
-    }
-    
-    priority_queue<unitPair, vector<unitPair>, cmp> pq;
+    };*/
+    struct Unit {
+        Packet* packet;
+        int finishTime;
+
+        friend bool operator< (Unit &a, Unit &b) {
+            return (a.finishTime < b.finishTime);
+        }
+
+        friend bool operator> (Unit &a, Unit &b) {
+            return (a.finishTime > b.finishTime);
+        }
+    };
+    //priority_queue<unitPair, vector<unitPair>, cmp> pq;
+    //priotiry_queue<Unit> pq;
+    priority_queue<Unit, vector<Unit>, greater<Unit> > pq;
 
     //Level levels[3];
     Level levels[SET_NUMBER];        // same queue number with HCS
