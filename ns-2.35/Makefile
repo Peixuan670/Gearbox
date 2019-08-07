@@ -224,6 +224,7 @@ OBJ_CC = \
 	queue/try.o \
 	queue/Flow.o \
 	queue/Level.o \
+	queue/PIFO.o \
 	queue/hierarchicalQueue.o\
 	queue/sfq.o queue/fq.o queue/drr.o queue/srr.o queue/cbq.o \
 	queue/jobs.o queue/marker.o queue/demarker.o \

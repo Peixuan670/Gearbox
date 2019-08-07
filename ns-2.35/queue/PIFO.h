@@ -34,17 +34,24 @@ private:
         Packet* packet;
         int finishTime;
 
-        friend bool operator< (Unit &a, Unit &b) {
-            return (a.finishTime < b.finishTime);
-        }
+        // friend bool operator< (Unit &a, Unit &b) {
+        //     return (a.finishTime < b.finishTime);
+        // }
 
-        friend bool operator> (Unit &a, Unit &b) {
-            return (a.finishTime > b.finishTime);
+        // friend bool operator> (Unit &a, Unit &b) {
+        //     return (a.finishTime > b.finishTime);
+        // }
+    };
+
+    struct cmp{
+        bool operator() (Unit a, Unit b) {`
+            return (a.finishTime < b.finishTime);
         }
     };
     //priority_queue<unitPair, vector<unitPair>, cmp> pq;
     //priotiry_queue<Unit> pq;
-    priority_queue<Unit, vector<Unit>, greater<Unit> > pq;
+
+    priority_queue<Unit, vector<Unit>, cmp> pq;
 
     //Level levels[3];
     Level levels[SET_NUMBER];        // same queue number with HCS

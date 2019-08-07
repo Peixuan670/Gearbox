@@ -22,7 +22,7 @@ struct cmp{
     }
 }*/
 
-static class PIFOlass : public TclClass {
+static class PIFOClass : public TclClass {
 public:
         PIFOClass() : TclClass("Queue/PIFO") {}
         TclObject* create(int, const char*const*) {
@@ -50,7 +50,6 @@ PIFO::PIFO(int volume) {
     currentRound = 0;
     pktCount = 0; // 07072019 Peixuan
     //pktCurRound = new vector<Packet*>;
-    priority_queue<unitPair, vector<unitPair>, cmp> pq = new priority_queue();
 }
 
 void PIFO::setCurrentRound(int currentRound) {
@@ -181,8 +180,9 @@ Packet* PIFO::deque() {
     //unitPair headUnit = pq.pop();
     //Packet *p = headUnit.first;
     //fprintf(stderr, "PIFO dequeue packet with Finish Time of %d\n", headUnit.second);
-    struct Unit unit = pq.pop();
-    Packet packet = unit.packet;
+    Unit unit = pq.top();
+    pq.pop();
+    Packet* p = unit.packet;
     fprintf(stderr, "PIFO dequeue packet with Finish Time of %d\n", unit.finishTime);
 
     /*while (!pktCurRound.size()) {
