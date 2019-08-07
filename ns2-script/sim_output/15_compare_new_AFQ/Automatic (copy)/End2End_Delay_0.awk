@@ -31,7 +31,7 @@ END {
         	end = end_time[packet_id];
 		seq = seq_num[packet_id];
         	packet_duration = end - start;
-        	if ( start < end ) printf("%f\t%f\n", start, packet_duration);
+        	if ( start < end ) printf("%f\t%f\n", seq, packet_duration);
 		#if(seq!=0) printf("%f %f %f %f\n", seq, start, end, packet_duration);
    	}
 }
