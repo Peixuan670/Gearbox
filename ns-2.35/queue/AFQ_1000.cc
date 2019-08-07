@@ -2,29 +2,29 @@
 
 #include "AFQ_1000.h"
 
-static class AFQ100Class : public TclClass {
+static class AFQ1000Class : public TclClass {
 public:
-        AFQ10Class() : TclClass("Queue/AFQ10") {}
+        AFQ1000Class() : TclClass("Queue/AFQ1000") {}
         TclObject* create(int, const char*const*) {
-            fprintf(stderr, "Created new TCL AFQ10 instance\n"); // Debug: Peixuan 07062019
-	        return (new AFQ_100);
+            fprintf(stderr, "Created new TCL AFQ1000 instance\n"); // Debug: Peixuan 07062019
+	        return (new AFQ_1000);
 	}
-} class_hierarchical_queue;
+} class_AFQ1000;
 
 AFQ_1000::AFQ_1000():AFQ_1000(DEFAULT_VOLUME) {
-    fprintf(stderr, "Created new AFQ10 instance\n"); // Debug: Peixuan 07062019
+    fprintf(stderr, "Created new AFQ1000 instance\n"); // Debug: Peixuan 07062019
 }
 
 AFQ_1000::AFQ_1000(int volume) {
-    fprintf(stderr, "Created new AFQ10 instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
+    fprintf(stderr, "Created new AFQ1000 instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
     flows.push_back(Flow(0, 2, 100));
     flows.push_back(Flow(1, 2, 100));
     flows.push_back(Flow(2, 2, 100));
     flows.push_back(Flow(3, 2, 100));
-    flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(5, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(6, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(4, 20, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(5, 20, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(6, 200, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
     //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -72,7 +72,8 @@ void AFQ_1000::enque(Packet* packet) {
         return;   // 07072019 Peixuan: exceeds the maximum round
     }
    
-    int curFlowID = iph->saddr();   // use source IP as flow id
+    //int curFlowID = iph->saddr();   // use source IP as flow id
+    int curFlowID = iph->flowid();   // use flow id as flow id
     int curBrustness = flows[curFlowID].getBrustness();
     if ((departureRound - currentRound) >= curBrustness) {
         fprintf(stderr, "?????Exceeds maximum brustness, drop the packet from Flow %d\n", iph->saddr()); // Debug: Peixuan 07072019
@@ -102,7 +103,7 @@ void AFQ_1000::enque(Packet* packet) {
 }
 
 // Peixuan: This can be replaced by any other algorithms
-int AFQ_100::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
+int AFQ_1000::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
     //int		fid_;	/* flow id */
     //int		prio_;
     // parameters in iph
@@ -135,7 +136,7 @@ int AFQ_100::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
 //06262019 Static getting all the departure packet in this virtual clock unit (JUST FOR SIMULATION PURPUSE!)
 
-Packet* AFQ_100::deque() {
+Packet* AFQ_1000::deque() {
 
     fprintf(stderr, "Start Dequeue\n"); // Debug: Peixuan 07062019
 
@@ -167,7 +168,7 @@ Packet* AFQ_100::deque() {
 }
 
 // Peixuan: now we only call this function to get the departure packet in the next round
-vector<Packet*> AFQ_100::runRound() {
+vector<Packet*> AFQ_1000::runRound() {
 
     fprintf(stderr, "Run Round\n"); // Debug: Peixuan 07062019
 

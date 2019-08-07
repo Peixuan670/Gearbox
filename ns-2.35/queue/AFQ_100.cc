@@ -4,27 +4,27 @@
 
 static class AFQ100Class : public TclClass {
 public:
-        AFQ10Class() : TclClass("Queue/AFQ10") {}
+        AFQ100Class() : TclClass("Queue/AFQ100") {}
         TclObject* create(int, const char*const*) {
-            fprintf(stderr, "Created new TCL AFQ10 instance\n"); // Debug: Peixuan 07062019
+            fprintf(stderr, "Created new TCL AFQ100 instance\n"); // Debug: Peixuan 07062019
 	        return (new AFQ_100);
 	}
-} class_hierarchical_queue;
+} class_AFQ100;
 
 AFQ_100::AFQ_100():AFQ_100(DEFAULT_VOLUME) {
     fprintf(stderr, "Created new AFQ10 instance\n"); // Debug: Peixuan 07062019
 }
 
 AFQ_100::AFQ_100(int volume) {
-    fprintf(stderr, "Created new AFQ10 instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
+    fprintf(stderr, "Created new AFQ100 instance with volumn = %d\n", volume); // Debug: Peixuan 07062019
     this->volume = volume;
     flows.push_back(Flow(0, 2, 100));
     flows.push_back(Flow(1, 2, 100));
     flows.push_back(Flow(2, 2, 100));
     flows.push_back(Flow(3, 2, 100));
-    flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(5, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(6, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(4, 20, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(5, 20, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(6, 200, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
     //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -113,7 +113,8 @@ int AFQ_100::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
     fprintf(stderr, "$$$$$Calculate Departure Round at VC = %d\n", currentRound); // Debug: Peixuan 07062019
 
-    int curFlowID = iph->saddr();   // use source IP as flow id
+    //int curFlowID = iph->saddr();   // use source IP as flow id
+    int curFlowID = iph->flowid();   // use flow id as flow id
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
     int curStartRound = max(currentRound, curLastDepartureRound);

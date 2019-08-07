@@ -9,7 +9,7 @@ public:
             fprintf(stderr, "Created new TCL AFQ10 instance\n"); // Debug: Peixuan 07062019
 	        return (new AFQ_10);
 	}
-} class_hierarchical_queue;
+} class_AFQ10;
 
 AFQ_10::AFQ_10():AFQ_10(DEFAULT_VOLUME) {
     fprintf(stderr, "Created new AFQ10 instance\n"); // Debug: Peixuan 07062019
@@ -22,9 +22,9 @@ AFQ_10::AFQ_10(int volume) {
     flows.push_back(Flow(1, 2, 100));
     flows.push_back(Flow(2, 2, 100));
     flows.push_back(Flow(3, 2, 100));
-    flows.push_back(Flow(4, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(5, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
-    flows.push_back(Flow(6, 2));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(4, 20, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(5, 20, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
+    flows.push_back(Flow(6, 200, 1000));        //07062019: Peixuan adding more flows for strange flow 3 problem
     //flows.push_back(Flow(1, 0.2));
     // Flow(1, 0.2), Flow(2, 0.3)};
     currentRound = 0;
@@ -113,7 +113,8 @@ int AFQ_10::cal_theory_departure_round(hdr_ip* iph, int pkt_size) {
 
     fprintf(stderr, "$$$$$Calculate Departure Round at VC = %d\n", currentRound); // Debug: Peixuan 07062019
 
-    int curFlowID = iph->saddr();   // use source IP as flow id
+    //int curFlowID = iph->saddr();   // use source IP as flow id
+    int curFlowID = iph->flowid();   // use flow id as flow id
     float curWeight = flows[curFlowID].getWeight();
     int curLastDepartureRound = flows[curFlowID].getLastDepartureRound();
     int curStartRound = max(currentRound, curLastDepartureRound);
