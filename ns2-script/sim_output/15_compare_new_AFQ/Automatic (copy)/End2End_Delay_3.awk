@@ -16,7 +16,7 @@ BEGIN {
    		highest_packet_id = packet_id;
   	if ( start_time[packet_id] == 0 )  
         	start_time[packet_id] = time;
-  	if ( node_1_address == 0 && action != "d" ) {
+  	if ( node_1_address == 3 && action != "d" ) {
         	if ( action == "r" ) {
         		end_time[packet_id] = time;
 			seq_num[packet_id] = seq_no;
@@ -31,7 +31,7 @@ END {
         	end = end_time[packet_id];
 		seq = seq_num[packet_id];
         	packet_duration = end - start;
-        	if ( start < end ) printf("%f\t%f\n", start, packet_duration);
+        	if ( start < end ) printf("%f\t%f\n", seq, packet_duration);
 		#if(seq!=0) printf("%f %f %f %f\n", seq, start, end, packet_duration);
    	}
 }
