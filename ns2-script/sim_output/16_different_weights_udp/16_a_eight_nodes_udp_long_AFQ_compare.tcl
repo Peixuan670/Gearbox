@@ -5,6 +5,10 @@ $ns color 1 Blue
 $ns color 2 Green
 $ns color 3 Yellow
 
+$ns color 4 Orange
+$ns color 5 Pink
+$ns color 6 Brown
+
 set tr [ open "out.tr" w]
 $ns trace-all $tr
 
@@ -39,11 +43,10 @@ $ns duplex-link $n0 $n4 2Mb 3ms DropTail
 $ns duplex-link $n1 $n4 2Mb 3ms DropTail
 $ns duplex-link $n2 $n4 2Mb 3ms DropTail
 $ns duplex-link $n3 $n4 2Mb 3ms DropTail
-$ns duplex-link $n4 $n5 4Mb 3ms PIFO
 #$ns duplex-link $n4 $n5 4Mb 3ms HRCC
 #$ns duplex-link $n4 $n5 4Mb 3ms AFQ10
 #$ns duplex-link $n4 $n5 4Mb 3ms AFQ100
-#$ns duplex-link $n4 $n5 4Mb 3ms AFQ1000
+$ns duplex-link $n4 $n5 4Mb 3ms AFQ1000
 #$ns duplex-link $n4 $n5 4Mb 3ms DropTail
 
 #set nodes position
@@ -106,7 +109,7 @@ set cbr3 [new Application/Traffic/CBR]
 $cbr3 attach-agent $udp3
 $cbr3 set type_ CBR
 $cbr3 set packet_size_ 1000
-$cbr3 set rate_ 1mb
+$cbr3 set rate_ 10mb
 $cbr3 set random_ false
 $udp3 set fid_ 3
 
