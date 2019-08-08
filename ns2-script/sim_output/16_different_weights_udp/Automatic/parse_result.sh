@@ -3,6 +3,11 @@ awk -f throughput_1.awk out.tr > results/throughput_1.txt
 awk -f throughput_2.awk out.tr > results/throughput_2.txt
 awk -f throughput_3.awk out.tr > results/throughput_3.txt
 
+awk -f throughput_combine_0.awk out.tr > results/throughput_combine_0.txt
+awk -f throughput_combine_1.awk out.tr > results/throughput_combine_1.txt
+awk -f throughput_combine_2.awk out.tr > results/throughput_combine_2.txt
+awk -f throughput_combine_3.awk out.tr > results/throughput_combine_3.txt
+
 awk -f End2End_Delay_0.awk out.tr > results/delay_0.txt
 awk -f End2End_Delay_1.awk out.tr > results/delay_1.txt
 awk -f End2End_Delay_2.awk out.tr > results/delay_2.txt
