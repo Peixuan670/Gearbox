@@ -14,9 +14,9 @@ BEGIN {
    	seq_no = $11;
    	packet_id = $12;
         #if (node_1==1 && node_2==2 && action == "+")
-	if (flow_id==1 && action == "+")
+	if (node_1_address==1 && action == "+")
         	numFs++;
-        if (flow_id==1 && action == "d")
+        if (node_1_address==1 && action == "d")
                 fsDrops++;
 }
 END {

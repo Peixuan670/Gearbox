@@ -14,7 +14,7 @@ BEGIN {
         node_2_address = $10;
         seq_no = $11;
         packet_id = $12;
-	if(action=="r" && node_2==5 && flow_id == 2) {
+	if(action=="r" && node_2==5 && node_1_address == 2) {
         #if(action=="r" && node_2==5 && node_1_address==1 && node_2_address==5) {
         	pkt_byte_sum[i+1]=pkt_byte_sum[i]+ pktsize; 
                 if(init==0) {
