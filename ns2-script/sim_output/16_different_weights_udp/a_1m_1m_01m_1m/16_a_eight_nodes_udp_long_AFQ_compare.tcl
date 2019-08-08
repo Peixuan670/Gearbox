@@ -44,9 +44,9 @@ $ns duplex-link $n1 $n4 2Mb 3ms DropTail
 $ns duplex-link $n2 $n4 2Mb 3ms DropTail
 $ns duplex-link $n3 $n4 2Mb 3ms DropTail
 #$ns duplex-link $n4 $n5 4Mb 3ms HRCC
-$ns duplex-link $n4 $n5 4Mb 3ms AFQ10
+#$ns duplex-link $n4 $n5 4Mb 3ms AFQ10
 #$ns duplex-link $n4 $n5 4Mb 3ms AFQ100
-#$ns duplex-link $n4 $n5 4Mb 3ms AFQ1000
+$ns duplex-link $n4 $n5 4Mb 3ms AFQ1000
 #$ns duplex-link $n4 $n5 4Mb 3ms DropTail
 
 #set nodes position
