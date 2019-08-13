@@ -43,7 +43,7 @@ END {
                		} else {
                        		jitter = delay_diff/seqno_diff;
                		}
-               		printf("%f %f\n", start, jitter);
+               		printf("%f\t%f\n", start, jitter);
               		last_seqno = pkt_seqno[packet_id];
               		last_delay = packet_duration;
        		}
