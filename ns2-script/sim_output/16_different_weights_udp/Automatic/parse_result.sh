@@ -23,6 +23,11 @@ awk -f packet_loss_1.awk out.tr >> results/packet_loss.txt
 awk -f packet_loss_2.awk out.tr >> results/packet_loss.txt
 awk -f packet_loss_3.awk out.tr >> results/packet_loss.txt
 
+awk -f jitter_0.awk out.tr > results/jitter_0.txt
+awk -f jitter_1.awk out.tr > results/jitter_1.txt
+awk -f jitter_2.awk out.tr > results/jitter_2.txt
+awk -f jitter_3.awk out.tr > results/jitter_3.txt
+
 
 
 
