@@ -27,17 +27,17 @@ BEGIN {
 	}
 }
 END {
-	printf("%.2f\t%.2f\n", end_time[0], 0);
+	printf("%.2f\t%.2f\t%.2f\n", end_time[0], 0, 0);
         for(j=1 ; j<i ; j++){
 		if(j<10){
 			th = pkt_byte_sum[j] / (end_time[j] - start_time)*8/1000;
-			printf("%.2f\t%.2f\n", end_time[j], th);
+			printf("%.2f\t%.2f\t%.2f\n", end_time[j], th, (end_time[j] - start_time));
 		} else {
 			th = (pkt_byte_sum[j]-pkt_byte_sum[j-10]) / (end_time[j] - end_time[j-10])*8/1000;
-			printf("%.2f\t%.2f\n", end_time[j], th);
+			printf("%.2f\t%.2f\t%.2f\n", end_time[j], th, (end_time[j] - end_time[j-10]));
 		}
 		#th = pkt_byte_sum[j] / (end_time[j] - start_time)*8/1000;
 		#printf("%.2f\t%.2f\n", end_time[j], th);
 	}
-	printf("%.2f\t%.2f\n", end_time[i-1], 0);
+	printf("%.2f\t%.2f\t%.2f\n", end_time[i-1], 0, 0);
 }
