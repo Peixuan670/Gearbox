@@ -19,7 +19,7 @@ BEGIN {
            	pkt_seqno[packet_id] = seq_no;
            	start_time[packet_id] = time;
    	}
-  	if ( flow_id == 0 && action != "d" ) {
+  	if ( node_1_address == 0 && action != "d" ) {
      		if ( action == "r" ) {
          		end_time[packet_id] = time;
       		}
