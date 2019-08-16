@@ -46,9 +46,9 @@ $ns duplex-link $n3 $n4 12Mb 3ms DropTail
 #$ns duplex-link $n4 $n5 4Mb 3ms HRCC
 #$ns duplex-link $n4 $n5 4Mb 3ms AFQ10
 #$ns duplex-link $n4 $n5 4Mb 3ms AFQ100
-$ns duplex-link $n4 $n5 4Mb 3ms AFQ1000
-#$ns duplex-link $n4 $n5 4Mb 3ms DropTail
-Queue set limit_ 5000
+#$ns duplex-link $n4 $n5 4Mb 3ms AFQ1000
+$ns duplex-link $n4 $n5 4Mb 3ms DropTail
+$ns queue-limit $n4 $n5 500
 
 #set nodes position
 $ns duplex-link-op $n0 $n4 orient right-up
