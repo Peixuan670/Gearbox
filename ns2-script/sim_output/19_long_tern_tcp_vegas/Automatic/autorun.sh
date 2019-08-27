@@ -1,7 +1,7 @@
 #Autorun
 #Put this in the Automatic director
 
-dir1="a_same_weight_all_vegas"
+dir1="b_same_weight_vegas+reno"
 
 # HCS
 cp ../$dir1/HCS/HCS_out.tr out.tr
