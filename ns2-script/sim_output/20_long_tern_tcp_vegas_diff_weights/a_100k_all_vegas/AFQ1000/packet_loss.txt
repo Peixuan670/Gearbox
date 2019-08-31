@@ -1,0 +1,4 @@
+number of packets sent:3774 lost:0
+number of packets sent:3770 lost:0
+number of packets sent:816 lost:0
+number of packets sent:3540 lost:0
